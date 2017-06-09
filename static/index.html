@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <title>Login/Logout animation concept</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+
+  <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/css?family=Open+Sans'>
+
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="bower_components/demo-console/index.css">
+  <link rel="stylesheet" href="bower_components/ekko-lightbox/dist/ekko-lightbox.min.css">
+  <link rel="stylesheet" href="css/kurento.css">
+
+  <link rel="stylesheet" href="css/style.css">
+
+
+</head>
+
+<body>
+  <div class="cont">
+  <div id="main" class="demo">
+    <div class="login">
+      <img class="login__check" src="img/logo2.png" alt="SIP">
+      <p class="title">SIP gateway</p>
+      <div class="login__form">
+        <div class="login__row">
+          <svg class="login__icon name svg-icon" viewBox="0 0 20 20">
+           <path d="M0,20 a10,8 0 0,1 20,0z M10,0 a4,4 0 0,1 0,8 a4,4 0 0,1 0,-8" />
+         </svg>
+          <input id="from" type="text" class="login__input name" placeholder="Username"/>
+        </div>
+        <div class="login__row" id="start">
+          <svg class="login__icon pass svg-icon" viewBox="0 0 22 22">
+            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+          </svg>
+          <input id="to" type="text" class="login__input pass" placeholder="Dial SIP number"/>
+        </div>
+        <button type="button" class="login__submit">Start Call</button>
+        <p class="login__signup">Fork me on GItHub &nbsp;<a>Now</a></p>
+      </div>
+    </div>
+    <div class="app">
+      <div class="app__top">
+         <video class="app__video_local" id="videoInput" autoplay poster="img/webrtc.png"></video>
+         <video class="app__video_remote" id="videoOutput" autoplay poster="img/webrtc.png"></video>
+      </div>
+      <div class="app__logout" id="stop">
+        <svg class="app__logout-icon svg-icon" viewBox="0 0 20 20">
+          <path d="M6,3 a8,8 0 1,0 8,0 M10,0 10,12"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="bower_components/kurento-utils/js/kurento-utils.js"></script>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script src="js/index_app.js"></script>
+  <script src="js/index.js"></script>
+  <script src="bower_components/adapter.js/adapter.js"></script>
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+
+</body>
+</html>
