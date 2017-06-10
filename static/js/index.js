@@ -15,7 +15,7 @@
  *
  */
 
-var ws = new WebSocket('wss://' + location.host + '/helloworld');
+var ws = new WebSocket('wss://' + location.host + '/sip-gw');
 var videoInput;
 var videoOutput;
 var webRtcPeer;

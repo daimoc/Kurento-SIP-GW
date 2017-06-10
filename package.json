@@ -1,6 +1,6 @@
 {
-  "name": "kurento-hello-world",
-  "version": "6.6.0",
+  "name": "Kurento-SIP-GW",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "postinstall": "cd static && bower install"

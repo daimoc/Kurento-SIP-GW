@@ -80,7 +80,7 @@ sip.init(kurentoPipelineRelease);
 
 var wss = new ws.Server({
     server : server,
-    path : '/helloworld'
+    path : '/sip-gw'
 });
 
 /*
