@@ -323,8 +323,10 @@ function stop(sessionId) {
     sip.bye(sessionId);
     if (sessions[sessionId]) {
         var pipeline = sessions[sessionId].pipeline;
-        console.info('Releasing pipeline');
-        pipeline.release();
+        if (pipeline != undefined){
+          console.info('Releasing pipeline');
+          pipeline.release();
+        }
         delete sessions[sessionId];
         delete candidatesQueue[sessionId];
     }
@@ -350,7 +352,7 @@ function stopFromBye(sessionId) {
 
 function onIceCandidate(sessionId, _candidate) {
     var candidate = kurento.getComplexType('IceCandidate')(_candidate);
-    if (sessions[sessionId].webRtcEndpoint!=undefined) {
+    if (sessions[sessionId]!=undefined && sessions[sessionId].webRtcEndpoint!=undefined) {
         console.info('Sending candidate');
         var webRtcEndpoint = sessions[sessionId].webRtcEndpoint;
         webRtcEndpoint.addIceCandidate(candidate);
