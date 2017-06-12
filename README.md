@@ -10,7 +10,7 @@ http://codepen.io/suez/pen/dPqxoM.
 This gateway was made to easily connect a browser to any classic SIP endpoint like Softphone, PABX or MCU.
 It was firstly designed to work with Asterisk and it works with it.
 
-## Installation
+## Installation on Ubuntu 14.04
 
 First, install  [Kurento-media-server](https://github.com/Kurento/kurento-media-server) (with a cotrun server it's better) :
 
@@ -52,6 +52,9 @@ node server.js
 Open https://localhost:8443/ and fill a userName and a destination number like 999@192.168.0.11 and click on Start Call.
 
 Kurento-SIP-GW will send an invite to destination and connect media after call accept by remote end.
+## Tested with
+* linphone
+* asterisk 11 video echo diaplan application
 
 ## Current Limitations
 
