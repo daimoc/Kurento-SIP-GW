@@ -84,7 +84,7 @@ SipStack.prototype.invite = function (sessionId,from,to,localSDP,callback){
         function( err, req ){
           if( err ) {
              console.log('Error '+ err ) ;
-             throw err;
+             return callback("reject",null);
            }
           console.log('sent request: %s', JSON.stringify(req) ) ;
 
@@ -152,6 +152,37 @@ SipStack.prototype.bye =  function (sessionId,sdpLocal) {
 								}) ;
 			}
 	}
+};
+
+SipStack.prototype.infoDtmf =  function (sessionId,dtmf) {
+
+		var dialog = SipStack.dialogs[sessionId];
+		if (dialog != undefined){
+				var messageBody="Signal="+dtmf+"\r\nDuration=160\r\n";
+				SipStack.appSip.request({
+                method: 'INFO',
+                stackDialogId: dialog,
+								headers: {
+									  'User-Agent': 'dracht.io',
+										'Content-Type': 'application/dtmf-relay'
+								},
+								body: messageBody
+              }, function(err, req){
+
+								if(req!=undefined)
+									console.log('sent request: %s', JSON.stringify(req) ) ;
+
+
+  							if( err || req == undefined) {
+									console.log(err);
+									console.log(req);
+									return;
+								}
+           			req.on('response', function(response){
+                	console.log('INFO '+response.status);
+                });
+							}) ;
+		}
 };
 
 

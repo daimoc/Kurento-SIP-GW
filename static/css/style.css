@@ -262,6 +262,22 @@ input, button {
   background: #fff;
 }
 
+.btndtmf {
+
+}
+
+.app__dialpad {
+  position: absolute;
+  z-index: 2;
+  background: rgba(25, 25, 25, .5);;
+}
+
+.dialpad {
+  position: absolute;
+  height: 20%;
+  top: 10%;
+  right: 15%;
+}
 
 .app__logout {
   position: absolute;

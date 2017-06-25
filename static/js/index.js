@@ -33,7 +33,7 @@ window.onload = function() {
 	videoInput = document.getElementById('videoInput');
 	videoOutput = document.getElementById('videoOutput');
 	setState(I_CAN_START);
-
+	$('.btndtmf').attr('onclick', 'sendDtmf(event)');
 }
 
 window.onbeforeunload = function() {
@@ -167,6 +167,20 @@ function setState(nextState) {
 	}*/
 
 	state = nextState;
+}
+
+
+function sendDtmf(event){
+	var target = event.target;
+	if (target != undefined && target.innerText!= undefined){
+		var dtmfValue = target.innerText;
+		console.log("sendDTMF "+dtmfValue);
+		var message = {
+			id : 'sendDtmf',
+			dtmf : dtmfValue
+		}
+		sendMessage(message);
+	}
 }
 
 function sendMessage(message) {

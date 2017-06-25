@@ -23,8 +23,10 @@ sudo apt-get install kurento-server
 
 Next, install  [drachtio-server](https://github.com/davehorton/drachtio-server) :
 
+Note : we must install devlop branch to support sip info.
+
 ```bash
-git clone --depth=50 --branch=master git://github.com/davehorton/drachtio-server.git && cd drachtio-server
+git clone --depth=50 --branch=develop git://github.com/davehorton/drachtio-server.git && cd drachtio-server
 git submodule update --init --recursive
 ./bootstrap.sh
 mkdir build && cd $_

@@ -142,7 +142,9 @@ wss.on('connection', function(ws) {
         case 'onIceCandidate':
             onIceCandidate(sessionId, message.candidate);
             break;
-
+        case 'sendDtmf':
+            sendDtmf(sessionId, message.dtmf);
+            break;
         default:
             ws.send(JSON.stringify({
                 id : 'error',
@@ -364,6 +366,10 @@ function onIceCandidate(sessionId, _candidate) {
         }
         candidatesQueue[sessionId].push(candidate);
     }
+}
+
+function sendDtmf(sessionId, dtmf){
+    sip.infoDtmf(sessionId,dtmf);
 }
 
 app.use(express.static(path.join(__dirname, 'static')));
