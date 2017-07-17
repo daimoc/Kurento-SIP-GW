@@ -19,9 +19,10 @@ var ws = new WebSocket('wss://' + location.host + '/sip-gw');
 var videoInput;
 var videoOutput;
 var webRtcPeer;
+var pc;
 var state = null;
 
-
+var sender ;
 
 const I_CAN_START = 0;
 const I_CAN_STOP = 1;
@@ -34,6 +35,7 @@ window.onload = function() {
 	videoOutput = document.getElementById('videoOutput');
 	setState(I_CAN_START);
 	$('.btndtmf').attr('onclick', 'sendDtmf(event)');
+
 }
 
 window.onbeforeunload = function() {
@@ -85,9 +87,31 @@ function start() {
 
     webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options, function(error) {
         if(error) return onError(error);
+				pc = webRtcPeer.peerConnection;
+				if(dtmfTransport=="inband"){
+								if ("getSenders" in  RTCPeerConnection.prototype){
+										// Firefox Version
+										var stream = pc.getSenders();
+										var track = stream[0];
+										sender = new DTMFSenderInband(stream[0]);
+									}
+									else {
+										// Chrome Opera version
+										var stream = pc.getLocalStreams();
+										var videoTracks = stream[0].getVideoTracks();
+										sender = new DTMFSenderInband(stream[0]);
+										var audioTracks = sender.outputStream.getAudioTracks()
+										pc.removeStream(stream[0]);
+										var newTracks = [videoTracks[0],audioTracks[0]];
+										var nStream = new MediaStream(newTracks);
+										pc.addStream(nStream);
+								}
+
+				}
         this.generateOffer(onOffer);
     });
 }
+
 
 function onIceCandidate(candidate) {
 	   console.log('Local candidate' + JSON.stringify(candidate));
@@ -101,6 +125,7 @@ function onIceCandidate(candidate) {
 
 function onOffer(error, offerSdp) {
 	if(error) return onError(error);
+
 
 	console.info('Invoking SDP offer callback function ' + location.host);
 	var message = {
@@ -119,8 +144,14 @@ function onError(error) {
 function startResponse(message) {
 	setState(I_CAN_STOP);
 	console.log('SDP answer received from server. Processing ...');
-	webRtcPeer.processAnswer(message.sdpAnswer);
+	webRtcPeer.processAnswer(message.sdpAnswer,onAnswerProcess);
+}
 
+function onAnswerProcess(){
+	if (senderDTMFInband)
+		senderDTMFInband.dtmf.ontonechange = function(e) {
+								console.log(JSON.stringify(e));
+							}
 }
 
 function stop() {
@@ -169,17 +200,43 @@ function setState(nextState) {
 	state = nextState;
 }
 
+var dtmfTransport ="inband";
+
+//var dtmfTransport ="sip";
 
 function sendDtmf(event){
 	var target = event.target;
 	if (target != undefined && target.innerText!= undefined){
 		var dtmfValue = target.innerText;
 		console.log("sendDTMF "+dtmfValue);
-		var message = {
-			id : 'sendDtmf',
-			dtmf : dtmfValue
+
+		if (dtmfTransport =="sip"){
+			var message = {
+				id : 'sendDtmf',
+				dtmf : dtmfValue
+			}
+			sendMessage(message);
 		}
-		sendMessage(message);
+		if (dtmfTransport=="rfc4733"){
+			if (pc != undefined && pc.getSenders) {
+				    var dtmfSender = pc.getSenders()[0].dtmf;
+						if (dtmfSender){
+							dtmfSender.ontonechange = handleToneChangeEvent;
+							console.log("Sending DTMF: \"" + dtmfValue + "\"");
+						  dtmfSender.insertDTMF(dtmfValue, 400, 50);
+						}
+				  }
+			}
+		}
+		if(dtmfTransport=="inband"){
+			  sender.insertDTMF(dtmfValue,400,50);
+		}
+
+}
+
+function handleToneChangeEvent(event) {
+	if (event.tone !== "") {
+	    console.log("Tone played: " + event.tone);
 	}
 }
 
