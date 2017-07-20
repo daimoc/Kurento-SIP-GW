@@ -40,11 +40,18 @@ And finally, install node modules :
 npm install
 ```
 
-## Configuration
+## Server Configuration
 Change config.serverPublicIP in file config.js to expose external  public IP used for SIP sdp generation.
 
 config.kurento.as_uri is for HTTPS node server, default=8443.
 config.kurento.ws_uri is for Kurento-media-sever uri, default='ws://localhost:8888/kurento'
+
+## Client Configuration
+Change client gateway option in static/js/config_client.js
+
+wsUrl : Kurneto-SIP-GW websocket server URL (default to 'wss://' + location.host + '/sip-gw' ).
+dtmfTransport = "inband" for audio inband DTMF || "sip"  for SIP INFO dtmf (Default to inband).
+
 
 ## To run
 ```bash
@@ -62,10 +69,11 @@ Kurento-SIP-GW will send an invite to destination and connect media after call a
 
 * Only a SIP inviter to other endpoint
 * No STUN/TURN/ICE support on SIP/RTP side
+* DTMF sending only not receiving
 
 ## Roadmap
 
- 1. Add DTMF support (soon)
+ 1. Add RFC 4733 DTMF sending support
  2. Add SIP REGISTER
  3. Add incoming call support
  4. Codec selection

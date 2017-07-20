@@ -15,13 +15,12 @@
  *
  */
 
-var ws = new WebSocket('wss://' + location.host + '/sip-gw');
+var ws = new WebSocket(wsUrl);
 var videoInput;
 var videoOutput;
 var webRtcPeer;
 var pc;
 var state = null;
-
 var sender ;
 
 const I_CAN_START = 0;
@@ -29,13 +28,11 @@ const I_CAN_STOP = 1;
 const I_AM_STARTING = 2;
 
 window.onload = function() {
-	//console = new Console();
 	console.log('Page loaded ...');
 	videoInput = document.getElementById('videoInput');
 	videoOutput = document.getElementById('videoOutput');
 	setState(I_CAN_START);
 	$('.btndtmf').attr('onclick', 'sendDtmf(event)');
-
 }
 
 window.onbeforeunload = function() {
@@ -170,39 +167,8 @@ function stop() {
 }
 
 function setState(nextState) {
-	/*
-	switch (nextState) {
-	case I_CAN_START:
-		$('#start').attr('disabled', false);
-		$('#start').attr('onclick', 'start()');
-		$('#stop').attr('disabled', true);
-		$('#stop').removeAttr('onclick');
-		break;
-
-	case I_CAN_STOP:
-		$('#start').attr('disabled', true);
-		$('#stop').attr('disabled', false);
-		$('#stop').attr('onclick', 'stop()');
-		break;
-
-	case I_AM_STARTING:
-		$('#start').attr('disabled', true);
-		$('#start').removeAttr('onclick');
-		$('#stop').attr('disabled', true);
-		$('#stop').removeAttr('onclick');
-		break;
-
-	default:
-		onError('Unknown state ' + nextState);
-		return;
-	}*/
-
 	state = nextState;
 }
-
-var dtmfTransport ="inband";
-
-//var dtmfTransport ="sip";
 
 function sendDtmf(event){
 	var target = event.target;
