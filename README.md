@@ -49,8 +49,9 @@ config.kurento.ws_uri is for Kurento-media-sever uri, default='ws://localhost:88
 ## Client Configuration
 Change client gateway option in static/js/config_client.js
 
-wsUrl : Kurneto-SIP-GW websocket server URL (default to 'wss://' + location.host + '/sip-gw' ).
-dtmfTransport = "inband" for audio inband DTMF || "sip"  for SIP INFO dtmf (Default to inband).
+* wsUrl : Kurneto-SIP-GW websocket server URL (default to 'wss://' + location.host + '/sip-gw' ).
+
+* dtmfTransport : "inband" for audio inband DTMF || "sip"  for SIP INFO dtmf (Default to inband).
 
 
 ## To run
