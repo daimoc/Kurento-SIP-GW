@@ -33,6 +33,9 @@ window.onload = function() {
 	videoOutput = document.getElementById('videoOutput');
 	setState(I_CAN_START);
 	$('.btndtmf').attr('onclick', 'sendDtmf(event)');
+	$('#alertButton').click(function(){
+		$("#alert").hide();
+	});
 }
 
 window.onbeforeunload = function() {
@@ -52,6 +55,8 @@ ws.onmessage = function(message) {
 			setState(I_CAN_START);
 		}
 		onError('Error message from server: ' + parsedMessage.message);
+		 //set timeout  $("#stop").trigger("click");
+		 setTimeout(function(){$("#stop").trigger("click");},2000);
 		break;
 	case 'iceCandidate':
 		webRtcPeer.addIceCandidate(parsedMessage.candidate)
@@ -135,7 +140,9 @@ function onOffer(error, offerSdp) {
 }
 
 function onError(error) {
-	console.error(error);
+	console.log(error);
+	$("#errorBox").text(error);
+	$("#alert").show();
 }
 
 function startResponse(message) {

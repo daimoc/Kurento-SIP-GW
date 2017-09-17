@@ -27,8 +27,8 @@ var fs    = require('fs');
 var https = require('https');
 var sip = require('./sipstack.js');
 var config = require('./config');
-
-
+var uuid = require('uuid/v1');
+var util = require('util');
 var options =
 {
   key:  fs.readFileSync('keys/server.key'),
@@ -65,8 +65,10 @@ var kurentoClient = null;
 var asUrl = url.parse(config.kurento.as_uri);
 var port = asUrl.port;
 var server = https.createServer(options, app).listen(port, function() {
-    console.log('Kurento Tutorial started');
+    console.log('Kurento SIP GW');
     console.log('Open ' + url.format(asUrl) + ' with a WebRTC capable browser');
+    console.log('Call timeout ' + config.maxCallSeconds + ' seconds');
+    console.log('Maximum concurent calls ' + config.maxConcurentCalls);
 });
 
 function kurentoPipelineRelease(sessionId){
@@ -97,7 +99,8 @@ wss.on('connection', function(ws) {
 
 
     sessionHandler(request, response, function(err) {
-        sessionId = request.session.id;
+        //sessionId = request.session.id;
+        sessionId = uuid();
         console.log('Connection received with sessionId ' + sessionId);
     });
 
@@ -117,7 +120,7 @@ wss.on('connection', function(ws) {
 
         switch (message.id) {
         case 'start':
-            sessionId = request.session.id;
+            //sessionId = request.session.id;
             sessions[sessionId]={
               'ws': ws
             };
@@ -183,6 +186,13 @@ function start(sessionId, ws, from,to, sdpOffer, callback) {
         return callback('Cannot use undefined sessionId');
     }
 
+
+   console.log(sessionId +"Concurent calls : " + Object.keys(sessions).length +"/"+ config.maxConcurentCalls + util.inspect(sessions) );
+    if(Object.keys(sessions).length > config.maxConcurentCalls){
+
+        return callback('Unable to start call due to server concurrent capacity limit');
+    }
+
     getKurentoClient(function(error, kurentoClient) {
         if (error) {
             return callback(error);
@@ -199,9 +209,6 @@ function start(sessionId, ws, from,to, sdpOffer, callback) {
                     pipeline.release();
                     return callback(error);
                 }
-
-
-
                 console.log("Collect Candidates");
                 if (candidatesQueue[sessionId]) {
                     while(candidatesQueue[sessionId].length) {
@@ -210,8 +217,6 @@ function start(sessionId, ws, from,to, sdpOffer, callback) {
                     }
                 }
                 console.log("connect media element");
-
-
 
                 connectMediaElements(webRtcEndpoint,rtpEndpoint, function(error) {
                     if (error) {
@@ -315,6 +320,8 @@ function createSipCall(sessionId,from,to,rtpEndpoint,callback){
             if (error){
               return callback(error);
             }
+            // Insert EnCall timeout
+            setTimeout(function(){  sip.bye(sessionId);stopFromBye(sessionId);},config.maxCallSeconds*1000);
             return callback(null);
           });
         });

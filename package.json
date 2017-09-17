@@ -14,8 +14,8 @@
     "kurento-client": "6.6.0",
     "drachtio":"1.0.16",
     "sdp-transform":"*",
-    "tree-kill":"*"
-
+    "tree-kill":"*",
+    "uuid":"*"
   },
   "devDependencies": {
     "bower": "^1.4.1"

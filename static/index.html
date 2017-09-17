@@ -21,6 +21,12 @@
   <div class="cont">
   <div id="main" class="demo">
     <div class="login">
+      <div id="alert" class="alert alert-danger "  style="display: none; font-size: 20px; margin-top: 200px;width : 100%;z-index : 1;height : 200px; position:absolute" role="alert">
+         <button id="alertButton" type="button" class="close" aria-label="Close">
+           <span aria-hidden="true">&times;</span>
+         </button>
+         <span id="errorBox">
+     </div>
       <img class="login__check" src="img/logo2.png" alt="SIP">
       <p class="title">SIP gateway</p>
       <div class="login__form">
@@ -28,23 +34,22 @@
           <svg class="login__icon name svg-icon" viewBox="0 0 20 20">
            <path d="M0,20 a10,8 0 0,1 20,0z M10,0 a4,4 0 0,1 0,8 a4,4 0 0,1 0,-8" />
          </svg>
-          <input id="from" type="text" class="login__input name" placeholder="Username"/>
+          <input id="from" type="text" class="login__input name" placeholder="Username"  value="Bob"/>
         </div>
         <div class="login__row" id="start">
           <svg class="login__icon pass svg-icon" viewBox="0 0 22 22">
             <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
           </svg>
-          <input id="to" type="text" class="login__input pass" placeholder="Dial SIP number"/>
+          <input id="to" type="text" class="login__input pass" placeholder="Dial SIP number" value="600@192.168.0.17:5070"/>
         </div>
         <button type="button" class="login__submit">Start Call</button>
-        <p class="login__signup">Fork me on GItHub &nbsp;<a>Now</a></p>
+        <p class="login__signup">Fork me on GItHub &nbsp;<a href="https://github.com/daimoc/Kurento-SIP-GW">Now</a></p>
       </div>
     </div>
     <div class="app">
       <div class="app__top">
          <video class="app__video_local" id="videoInput" autoplay poster="img/webrtc.png"></video>
          <video class="app__video_remote" id="videoOutput" autoplay poster="img/webrtc.png"></video>
-
          <div class="dialpad">
          <table class="app__dialpad">
               <tr>

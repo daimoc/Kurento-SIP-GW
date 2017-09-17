@@ -43,8 +43,10 @@ npm install
 ## Server Configuration
 Change config.serverPublicIP in file config.js to expose external  public IP used for SIP sdp generation.
 
-config.kurento.as_uri is for HTTPS node server, default=8443.
-config.kurento.ws_uri is for Kurento-media-sever uri, default='ws://localhost:8888/kurento'
+* config.kurento.as_uri is for HTTPS node server, default=8443.
+* config.kurento.ws_uri is for Kurento-media-sever uri, default='ws://localhost:8888/kurento'
+* config.maxCallSeconds is for Call time limitation to control and limit long call usage (Demo server is limited to 60 seconds calls)
+* config.maxConcurentCalls is for limiting max concurrent call on a server.
 
 ## Client Configuration
 Change client gateway option in static/js/config_client.js
@@ -74,6 +76,7 @@ Kurento-SIP-GW will send an invite to destination and connect media after call a
 
 ## Roadmap
 
+ 0. Provide Demo ready server
  1. Add RFC 4733 DTMF sending support
  2. Add SIP REGISTER
  3. Add incoming call support
