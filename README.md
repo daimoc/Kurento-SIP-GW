@@ -12,7 +12,7 @@ It was firstly designed to work with Asterisk and it works with it.
 
 ## Installation on Ubuntu 14.04
 
-First, install  [Kurento-media-server](https://github.com/Kurento/kurento-media-server) (with a cotrun server it's better) :
+First, install  [Kurento-media-server](https://github.com/Kurento/kurento-media-server) (with a coturn server it's better) :
 
 ```bash
 echo "deb http://ubuntu.kurento.org trusty kms6" | sudo tee /etc/apt/sources.list.d/kurento.list
@@ -21,11 +21,29 @@ sudo apt-get update
 sudo apt-get install kurento-server
 ```
 
+Now, install [coturn](http://doc-kurento.readthedocs.io/en/stable/faq.html)
+```bash
+sudo apt-get install coturn
+```
+
+Edit cotrun startup script /etc/init.d/coturn
+
+* If you're behind a NAT add :
+```bash
+EXTERNAL_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
+LOCAL_IP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
+
+DAEMON_ARGS="-c /etc/turnserver.conf -f -o -a -v -r kurento.org
+-u kurento:kurento --no-stdout-log --external-ip $EXTERNAL_IP/$LOCAL_IP"
+```
+
+
 Next, install  [drachtio-server](https://github.com/davehorton/drachtio-server) :
 
 Note : we must install devlop branch to support sip info.
 
 ```bash
+sudo apt-get install autotool automake libtool-bin g++
 git clone --depth=50 --branch=develop git://github.com/davehorton/drachtio-server.git && cd drachtio-server
 git submodule update --init --recursive
 ./bootstrap.sh
