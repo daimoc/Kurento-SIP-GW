@@ -51,6 +51,19 @@ mkdir build && cd $_
 ../configure CPPFLAGS='-DNDEBUG'
 make
 sudo make install
+# Put Drachtio as a Deamon service with sytemd
+cp drachtio-server.service /etc/systemd/system
+# Put Drachtio as a Deamon service with init.d
+cp drachtio-init-script /etc/systemd/system
+
+
+cd ../..
+cp drachtio-conf.xml /etc
+
+#start service
+service drachtio-server start
+#or
+service drachtio-init-script start
 ```
 
 And finally, install node modules :
