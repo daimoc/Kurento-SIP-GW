@@ -1,0 +1,83 @@
+<drachtio>
+
+    <!-- udp port to listen on for client connections (default 8022), and shared secret used to authenticate clients -->
+	<admin port="9022" secret="cymru">localhost</admin>
+  
+    <!-- sip configuration -->
+    <sip>
+        <contacts>
+            <contact>sip:*;transport=udp,tcp</contact>
+        </contacts>
+
+        <!-- if you want to change the sip timers
+            <timers>
+                <t1>500</t1>
+                <t2>4000</t2>
+                <t4>5000</t4>
+                <t1x64>32000</t1x64>
+            </timers>
+        -->
+
+        <!-- uncommenting this will cause all new requests (i.e. requests outside of a dialog) to go through the specified proxy -->
+        <!--
+        <outbound-proxy>sip:10.10.10.1</outbound-proxy>
+        -->
+
+        <!-- optional list of header values which, if encountered in a message will trigger an action
+             [tcp-]action="reject|discard"
+             reject means send a sip non-success response immediately
+             discard means sliently discard the request, generating no response
+        -->
+        <spammers action="reject" tcp-action="discard">
+            <header name="User-Agent">
+                <value>sip-cli</value>
+                <value>sipcli</value>
+                <value>friendly-scanner</value>
+            </header>
+            <header name="To">
+                <value>sipvicious</value>
+            </header>
+        </spammers>
+    </sip>
+
+    <redis>
+        <address>127.0.0.1</address>
+    </redis>
+
+    <cdrs>true</cdrs>
+            
+    <!-- logging configuration -->
+    <logging>
+
+        <!--
+        <syslog>
+            <address>my.syslog.serve</address>
+            <port>514</port>
+            <facility>local6</facility>
+        </syslog>
+        -->
+
+        <file>
+            <!-- file name pattern for log file -->
+            <name>/tmp/drachtioLogs//drachtio_%Y%m%d_%H%M%S-%N.log</name>
+
+            <!-- location to collect rotated files (collected each night at midnight) -->
+            <archive>/tmp/drachtioLogs/archive</archive>
+
+            <!-- limit rotated files collection when total size in the archive dir reaches this size (in MB) -->
+            <maxSize>5120</maxSize> 
+
+            <!-- limit rotated files collection when free space at or below this size (in MB) -->
+            <minSize>10240</minSize>
+
+            <auto-flush>true</auto-flush>
+        </file>
+
+        <!-- sofia internal log level, from 0 (minimal) to 9 (verbose) -->
+        <sofia-loglevel>9</sofia-loglevel>
+        
+        <!-- notice, warning, error, info, debug.  Default: info -->
+        <loglevel>info</loglevel>
+    </logging>
+        
+</drachtio>
