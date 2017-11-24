@@ -11,7 +11,7 @@ This gateway was made to easily connect a browser to any classic SIP endpoint li
 It was firstly designed to work with Asterisk and it works with it.
 
 ## Architecture
-![Kurento-SIP-GW architecture](https://raw.githubusercontent.com/daimoc/Kurento-Nodejs-SIP/master/archi.png "Kurento-SIP-GW architecture")
+![Kurento-SIP-GW architecture](https://raw.githubusercontent.com/daimoc/Kurento-SIP-GW/master/archi.png "Kurento-SIP-GW architecture")
 
 ## Installation on Ubuntu 14.04
 
