@@ -10,6 +10,9 @@ http://codepen.io/suez/pen/dPqxoM.
 This gateway was made to easily connect a browser to any classic SIP endpoint like Softphone, PABX or MCU.
 It was firstly designed to work with Asterisk and it works with it.
 
+## Architecture
+![Kurento-SIP-GW architecture](https://raw.githubusercontent.com/daimoc/Kurento-Nodejs-SIP/master/archi.png "Kurento-SIP-GW architecture")
+
 ## Installation on Ubuntu 14.04
 
 First, install  [Kurento-media-server](https://github.com/Kurento/kurento-media-server) (with a coturn server it's better) :
