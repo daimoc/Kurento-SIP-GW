@@ -27,10 +27,20 @@ make
 sudo make install
 # Put Drachtio as a Deamon service
 cp drachtio-server.service /etc/systemd/system
+
 cd ../..
 cp drachtio-conf.xml /etc
 
-echo "Installation od node modules"
+echo "Installation of node modules"
 npm install
+
+#PUT Kurento-sip-gw as a service
+
+# replace SERVERPATH with current installation path
+PATH=`pwd`
+sed -i -e "s/SERVERPATH/$PATH/g" kurento-sip-gw.service > my-kurento-sip-gw.service
+cp my-kurento-sip-gw.service /etc/systemd/system
+systemctl daemon-reload
+
 
 echo "end"
