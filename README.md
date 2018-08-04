@@ -123,6 +123,7 @@ Kurento-SIP-GW will send an invite to destination and connect media after call a
  3. Build unit Test
 
 Not planified yet : 
+
  4. Run load Test
  5. Add RFC 4733 DTMF sending support
  6. Add SIP REGISTER
