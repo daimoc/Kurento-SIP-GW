@@ -117,14 +117,17 @@ Kurento-SIP-GW will send an invite to destination and connect media after call a
 
 ## Roadmap
 
- 0. Provide Demo ready server
- 1. Add RFC 4733 DTMF sending support
- 2. Add SIP REGISTER
- 3. Add incoming call support
- 4. Codec selection
- 5. Call control API and administrator UI
- 6. Build unit Test
- 7. Run load Test
+ 0. Provide Demo ready server (still waiting  purchasing department agreement....)
+ 1. Codec selection
+ 2. Call control API and administrator UI
+ 3. Build unit Test
+
+Not planified yet : 
+ 4. Run load Test
+ 5. Add RFC 4733 DTMF sending support
+ 6. Add SIP REGISTER
+ 7. Add incoming call support
+
 
 
 ## Contributors
