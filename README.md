@@ -130,7 +130,6 @@ Not planified yet :
  7. Add incoming call support
 
 
-
 ## Contributors
 Damien Fétis
 
