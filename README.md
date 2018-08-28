@@ -46,7 +46,7 @@ Next, install  [drachtio-server](https://github.com/davehorton/drachtio-server) 
 Note : we must install devlop branch to support sip info.
 
 ```bash
-sudo apt-get install autotool automake libtool-bin g++
+sudo apt-get install autoconf automake libtool-bin g++
 git clone --depth=50 --branch=develop git://github.com/davehorton/drachtio-server.git && cd drachtio-server
 git submodule update --init --recursive
 ./bootstrap.sh
@@ -122,13 +122,12 @@ Kurento-SIP-GW will send an invite to destination and connect media after call a
  2. Call control API and administrator UI
  3. Build unit Test
 
-Not planified yet : 
+Not planified yet :
 
  4. Run load Test
  5. Add RFC 4733 DTMF sending support
  6. Add SIP REGISTER
  7. Add incoming call support
-
 
 
 ## Contributors

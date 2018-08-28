@@ -5,14 +5,14 @@ echo "Start"
 
 echo "Installation of basic element"
 
-sudo apt-get -y install git nodejs autoconf automake libtool-bin g++ libcurl4-openssl-dev libssl-dev openh264-gst-plugins-bad-1.5
+sudo apt-get -y install git nodejs autoconf automake libtool-bin g++ libssl-dev
 
 echo "Installation of Kurento"
 
 echo "deb http://ubuntu.kurento.org xenial kms6" | sudo tee /etc/apt/sources.list.d/kurento.list
 wget -O - http://ubuntu.kurento.org/kurento.gpg.key | sudo apt-key add -
 sudo apt-get update
-sudo apt-get install kurento-media-server-6
+sudo apt-get install kurento-meaida-server
 
 #echo "Installation of coturn"
 #sudo apt-get install coturn
@@ -21,7 +21,7 @@ echo "Installation of Drachtio"
 git clone --depth=50 --branch=develop git://github.com/davehorton/drachtio-server.git && cd drachtio-server
 git submodule update --init --recursive
 ./bootstrap.sh
-mkdir build && cd build
+mkdir build && cd $_
 ../configure CPPFLAGS='-DNDEBUG'
 make
 sudo make install
