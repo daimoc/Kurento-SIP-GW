@@ -71,6 +71,8 @@ SipStack.prototype.init = function (callback){
 SipStack.prototype.invite = function (sessionId,from,to,localSDP,callback){
   var sipDest = to;
   console.log("Send invite to "+ sipDest);
+	console.log("Send  local SDP to "+ localSDP);
+
   if (sipServerConnected){
     SipStack.appSip.request({
               uri: "sip:"+sipDest,
@@ -94,7 +96,9 @@ SipStack.prototype.invite = function (sessionId,from,to,localSDP,callback){
 
             if( res.status == 200) {
               var remoteSdpStr = res.body;
-							remoteSdpStr+="\na=ptime:20";
+							remoteSdpStr+="a=ptime:20";
+							var h264Payload = getH264Payload(remoteSdpStr);
+						  remoteSdpStr =  remoteSdpStr.replace(new RegExp("a=rtcp-fb:\\*", "g"),  "a=rtcp-fb:"+h264Payload);
               console.log('recieved response: %s', remoteSdpStr);
               console.log(req.msg.headers);
 							console.log('dialogId recv: ', res.stackDialogId);
@@ -197,5 +201,23 @@ SipStack.prototype.registerWebRTCEndpoint =  function (from) {
 SipStack.prototype.registerSIP =  function (from,host,password) {
 
 };
+
+function getH264Payload(sdp){
+	var sdpObject = transform.parse(sdp);
+	console.log("RTP lenght"+sdpObject.media[1].rtp.length);
+	var newRTP = [];
+	for (var i=0; i < sdpObject.media[1].rtp.length ; i++){
+		console.log("Media 1 Codec  : "+sdpObject.media[1].rtp[i].codec);
+		if (sdpObject.media[1].rtp[i].codec=="H264"){
+				newRTP.push(sdpObject.media[1].rtp[i]);
+				break;
+		}
+	}
+	var h264Payload=newRTP[0].payload;
+	return h264Payload;
+}
+
+/*Asuming a classic sdp with media[1] as the only video media*/
+SipStack.prototype.getH264Payload = getH264Payload;
 
 module.exports = new SipStack();

@@ -29,6 +29,9 @@ var sip = require('./sipstack.js');
 var config = require('./config');
 var uuid = require('uuid/v1');
 var util = require('util');
+var transform = require('sdp-transform');
+
+
 var options =
 {
   key:  fs.readFileSync('keys/server.key'),
@@ -232,7 +235,11 @@ function start(sessionId, ws, from,to, sdpOffer, callback) {
                         }));
                     });
 
+                  //  sdpOffer = removeUnWantedCodec(sdpOffer);
+
                     webRtcEndpoint.processOffer(sdpOffer, function(error, sdpAnswer) {
+
+                        console.log("Sdp Answer WebRTC Endpoint " + sdpAnswer);
                         if (error) {
                             pipeline.release();
                             return callback(error);
@@ -268,7 +275,73 @@ function getIPAddress() {
 function replace_ip(sdp, ip) {
     if (!ip)
       ip = getIPAddress();
-    return sdp.replace(new RegExp("IN IP4 .*","g"), "IN IP4 " + ip);
+    console.log("IP " + ip);
+    console.log("sdp init : "+sdp);
+
+   var sdpObject = transform.parse(sdp);
+   sdpObject.origin.address = ip;
+   sdpObject.connection.ip = ip;
+   var sdpResult = transform.write(sdpObject);
+   console.log("sdp result : "+sdpResult);
+   return sdpResult;
+}
+
+function mungleSDP(sdp){
+  mugleSdp = sdp;
+  var mugleSdp =  sdp.replace(new RegExp("RTP/AVPF", "g"),  "RTP/AVP");
+//  var mugleSdp =  mugleSdp.replace(new RegExp("104", "g"),  "96");
+  var h264Payload = sip.getH264Payload(sdp);
+  mugleSdp+="a=fmtp:"+h264Payload+" profile-level-id=42801F\n";
+  return mugleSdp;
+}
+
+function prettyJSON(obj) {
+    console.log(JSON.stringify(obj, null, 2));
+}
+
+
+/*Not yet working*/
+function removeUnWantedCodec(sdp){
+   console.log("removeUnWantedCodec");
+   var sdpObject = transform.parse(sdp);
+
+   prettyJSON(sdpObject);
+
+   console.log("RTP lenght"+sdpObject.media[1].rtp.length);
+   var newRTP = [];
+   for (var i=0; i < sdpObject.media[1].rtp.length ; i++){
+     console.log("Media 1 Codec  : "+sdpObject.media[1].rtp[i].codec);
+     if (sdpObject.media[1].rtp[i].codec=="H264"){
+         newRTP.push(sdpObject.media[1].rtp[i]);
+         break;
+     }
+   }
+   var payloadH264=newRTP[0].payload;
+   var newFmtp = [];
+   for (var i=0; i < sdpObject.media[1].fmtp.length ; i++){
+     console.log("fmtp : "+sdpObject.media[1].fmtp[i].payload);
+     if (sdpObject.media[1].fmtp[i].payload == payloadH264){
+         newFmtp.push(sdpObject.media[1].fmtp[i]);
+     }
+   }
+
+   var newRtcpFb=[];
+   for (var i=0; i < sdpObject.media[1].rtcpFb.length ; i++){
+     console.log("rtcpFb  : "+sdpObject.media[1].rtcpFb[i].payload);
+     if (sdpObject.media[1].rtcpFb[i].payload == payloadH264){
+         newRtcpFb.push(sdpObject.media[1].rtcpFb[i]);
+     }
+   }
+
+   sdpObject.media[1].rtp=newRTP;
+   sdpObject.media[1].fmtp=newFmtp;
+   sdpObject.media[1].rtcpFb=newRtcpFb;
+   sdpObject.media[1].payloads=payloadH264.toString();
+
+   prettyJSON(sdpObject);
+   var sdpResult = transform.write(sdpObject);
+   console.log("sdp result : "+sdpResult);
+   return sdpResult;
 }
 
 function createMediaElements(sessionId,pipeline, ws,from,to , callback) {
@@ -312,6 +385,7 @@ function connectMediaElements(webRtcEndpoint, rtpEndpoint,callback) {
 function createSipCall(sessionId,from,to,rtpEndpoint,callback){
       rtpEndpoint.generateOffer(function(error, sdpOffer) {
         var modSdp =  replace_ip(sdpOffer);
+        modSdp = mungleSDP(modSdp);
         sip.invite (sessionId,from,to,modSdp,function (error,remoteSdp){
           if (error){
             return callback(error);
@@ -321,7 +395,10 @@ function createSipCall(sessionId,from,to,rtpEndpoint,callback){
               return callback(error);
             }
             // Insert EnCall timeout
-            setTimeout(function(){  sip.bye(sessionId);stopFromBye(sessionId);},config.maxCallSeconds*1000);
+            setTimeout(function(){
+              console.log("EndCall Timeout "+sessionId);
+              sip.bye(sessionId);stopFromBye(sessionId);}
+              ,config.maxCallSeconds*1000);
             return callback(null);
           });
         });
