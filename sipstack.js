@@ -31,6 +31,7 @@ var SipStack = function () {};
 	 SipStack.sessionIds = {};
 	 SipStack.sessionIdByCalls = {};
 	 SipStack.requests = {};
+	 SipStack.localSDP = {};
 	 SipStack.prototype.log = function () {
 			 console.log('doo!');
 	 }
@@ -52,8 +53,26 @@ var SipStack = function () {};
 			delete SipStack.sessionIds[dialog];
 			delete SipStack.dialogs[sessionId];
 			delete SipStack.sessionIdByCalls[callId];
+			delete SipStack.localSDP[sessionId];
     	res.send(200) ;
     }) ;
+
+	SipStack.appSip.use('invite', function( req, res){
+    	console.log('INviTE recieved: %s', JSON.stringify(res) ) ;
+    	var callId = res.msg.headers['call-id'];
+    	console.log('INVITE recieved: %s index %s' , JSON.stringify(res),callId ) ;
+			// get sessionId
+			var sessionId = SipStack.sessionIdByCalls[callId];
+			if (sessionId){
+				var dialog =  SipStack.dialogs[sessionId];
+				res.send( 200,{
+        	body: SipStack.localSDP[sessionId]
+    		}) ;
+			}
+			else
+				res.send(404) ;
+	 }) ;
+
 
 SipStack.prototype.init = function (callback){
   	SipStack.sipServerConnected = false;
@@ -103,6 +122,8 @@ SipStack.prototype.invite = function (sessionId,from,to,localSDP,callback){
               console.log(req.msg.headers);
 							console.log('dialogId recv: ', res.stackDialogId);
   						SipStack.dialogs[sessionId] = res.stackDialogId ;
+							SipStack.localSDP[sessionId] = localSDP;
+
 							SipStack.sessionIds[res.stackDialogId] = sessionId;
               var callId = req.msg.headers["call-id"];
 							SipStack.sessionIdByCalls[callId] = sessionId;
@@ -150,6 +171,7 @@ SipStack.prototype.bye =  function (sessionId,sdpLocal) {
 									delete SipStack.sessionIds[dialog];
 									delete SipStack.dialogs[sessionId];
 									delete SipStack.sessionIdByCalls[callId];
+									delete SipStack.localSDP[sessionId];
              			req.on('response', function(response){
 	                console.log('BYE '+response.status);
 	                });
@@ -204,6 +226,8 @@ SipStack.prototype.registerSIP =  function (from,host,password) {
 
 function getH264Payload(sdp){
 	var sdpObject = transform.parse(sdp);
+//	if (sdpObject.media.length < 2)
+	//	return 0;
 	console.log("RTP lenght"+sdpObject.media[1].rtp.length);
 	var newRTP = [];
 	for (var i=0; i < sdpObject.media[1].rtp.length ; i++){
