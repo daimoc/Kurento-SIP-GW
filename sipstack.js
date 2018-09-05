@@ -237,7 +237,10 @@ function getH264Payload(sdp){
 				break;
 		}
 	}
-	var h264Payload=newRTP[0].payload;
+	var h264Payload=0;
+	if (newRTP.length > 0)
+		h264Payload = newRTP[0].payload;
+
 	return h264Payload;
 }
 
