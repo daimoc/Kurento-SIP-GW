@@ -5,14 +5,14 @@ echo "Start"
 
 echo "Installation of basic element"
 
-sudo apt-get -y install git nodejs autoconf automake libtool-bin g++ libssl-dev
+sudo apt-get -y install git nodejs autoconf automake libtool-bin g++ libssl-dev libcurl4-openssl-dev
 
 echo "Installation of Kurento"
 
 echo "deb http://ubuntu.kurento.org xenial kms6" | sudo tee /etc/apt/sources.list.d/kurento.list
 wget -O - http://ubuntu.kurento.org/kurento.gpg.key | sudo apt-key add -
 sudo apt-get update
-sudo apt-get install kurento-meaida-server
+sudo apt-get install kurento-media-server-6.0
 
 #echo "Installation of coturn"
 #sudo apt-get install coturn

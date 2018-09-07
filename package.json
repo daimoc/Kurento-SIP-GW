@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "postinstall": "cd static && bower install"
+    "postinstall": "cd static && bower install",
+    "pretest": "eslint --ignore-path .gitignore .",
+    "test": "NODE_ENV=test node test/ | ./node_modules/.bin/tap-spec",
+    "coverage": "NODE_ENV=test ./node_modules/.bin/istanbul cover test/ --report html",
+    "jslint": "eslint lib"
   },
   "dependencies": {
     "cookie-parser": "^1.3.5",
@@ -18,6 +22,13 @@
     "uuid":"*"
   },
   "devDependencies": {
-    "bower": "^1.4.1"
+    "bower": "^1.4.1",
+    "blue-tape": "^1.0.0",
+    "eslint": "^4.19.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "istanbul": "^0.4.5",
+    "tap": "^12.0.1",
+    "tap-dot": "^1.0.5",
+    "tap-spec": "^5.0.0"
   }
 }
