@@ -13,7 +13,7 @@ It was firstly designed to work with Asterisk and it works with it.
 ## Architecture
 ![Kurento-SIP-GW architecture](https://raw.githubusercontent.com/daimoc/Kurento-SIP-GW/master/archi.png "Kurento-SIP-GW architecture")
 
-## Installation on Ubuntu 14.04
+## Installation on Ubuntu 16.04
 
 First, install  [Kurento-media-server](https://github.com/Kurento/kurento-media-server) (with a coturn server it's better) :
 
@@ -21,7 +21,7 @@ First, install  [Kurento-media-server](https://github.com/Kurento/kurento-media-
 echo "deb http://ubuntu.kurento.org trusty kms6" | sudo tee /etc/apt/sources.list.d/kurento.list
 wget -O - http://ubuntu.kurento.org/kurento.gpg.key | sudo apt-key add -
 sudo apt-get update
-sudo apt-get install kurento-server
+sudo apt-get install kurento-server-6.0
 ```
 
 Now, install [coturn](http://doc-kurento.readthedocs.io/en/stable/faq.html)
@@ -46,7 +46,7 @@ Next, install  [drachtio-server](https://github.com/davehorton/drachtio-server) 
 Note : we must install devlop branch to support sip info.
 
 ```bash
-sudo apt-get install autoconf automake libtool-bin g++
+sudo apt-get install autoconf automake libtool-bin g++ libcurl4-openssl-dev libssl-dev
 git clone --depth=50 --branch=develop git://github.com/davehorton/drachtio-server.git && cd drachtio-server
 git submodule update --init --recursive
 ./bootstrap.sh
@@ -101,13 +101,31 @@ Change client gateway option in static/js/config_client.js
 ```bash
 node server.js
 ```
-
 Open https://localhost:8443/ and fill a userName and a destination number like 999@192.168.0.11 and click on Start Call.
 
 Kurento-SIP-GW will send an invite to destination and connect media after call accept by remote end.
+
+## Reduce CPU usage by disabling H264 encoding in Kurento
+By removing VP8 support in Kurento server configuration you can disable h264 encoding and reduce  CPU usage by a factor 4  (from 40% to 10% of 1 core on a i7-7820HQ CPU per call).
+
+Take care that removing transcoding in Kurento add some stability issues (Maybe due to keyframe generation on browser side).
+
+First install openh264 gstreamer plugin 
+```bash
+sudo apt-get install openh264-gst-plugins-bad-1.5
+```
+Then remove vp8 from /etc/kurento/modules/kurento/SdpEndpoint.conf.json by commenting VP8 line  "name" : "VP8/90000" in VideoCodecs Array.
+
+Restart Kurento
+```bash
+sudo kurent-mediaserver-6.0 restart
+```
+
 ## Tested with
-* linphone
-* asterisk 11 video echo diaplan application
+* Linphone
+* Asterisk 11 video echo diaplan application
+* Scopia Elite 6000 Series MCU - Avaya
+* Cisco MSE 8000 Series MCU
 
 ## Current Limitations
 
