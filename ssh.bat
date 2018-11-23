@@ -1,0 +1,2 @@
+vagrant ssh
+pause

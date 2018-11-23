@@ -4,6 +4,7 @@ echo "Kurent SIP gateway basic sh script installation for Ubuntu 16"
 echo "Start"
 
 echo "Installation of basic element"
+sudo apt-get update
 
 sudo apt-get -y install git nodejs autoconf automake libtool-bin g++ libssl-dev libcurl4-openssl-dev
 
