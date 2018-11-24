@@ -1,15 +1,12 @@
 var drachtio = require('drachtio');
 var appSip = drachtio() ;
-var fs = require('fs') ;
 var debug = require('debug')('basic') ;
 var transform = require('sdp-transform');
-var kill  = require('tree-kill');
 var config = require('./config');
 
 function getConnectionIp (sdpJson){
 	return  sdpJson.connection.ip;
 }
-
 
 function getPortByType (sdpJson,type){
 	var media = sdpJson.media;

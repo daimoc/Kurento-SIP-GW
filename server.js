@@ -22,18 +22,14 @@ var express = require('express');
 var session = require('express-session')
 var minimist = require('minimist');
 var ws = require('ws');
-var kurento = require('kurento-client');
 var fs    = require('fs');
 var https = require('https');
-
 
 var sip = require('./sipstack.js');
 var media = require('./mediastack.js');
 var config = require('./config');
 var uuid = require('uuid/v1');
 var util = require('util');
-var transform = require('sdp-transform');
-
 
 var options =
 {
@@ -73,7 +69,7 @@ var server = https.createServer(options, app).listen(port, function() {
 
 
 sip.init(kurentoPipelineRelease);
-
+media.init(config,sip);
 var wss = new ws.Server({
     server : server,
     path : '/sip-gw'
