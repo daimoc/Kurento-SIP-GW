@@ -24,7 +24,6 @@ var minimist = require('minimist');
 var ws = require('ws');
 var fs    = require('fs');
 var https = require('https');
-
 var sip = require('./sipstack.js');
 var media = require('./mediastack.js');
 var config = require('./config');
@@ -53,7 +52,6 @@ var sessionHandler = session({
 
 app.use(sessionHandler);
 
-
 /*
  * Server startup
  */
@@ -67,9 +65,14 @@ var server = https.createServer(options, app).listen(port, function() {
 });
 
 
+function kurentoPipelineRelease(sessionId){
+  console.log('Stop session ID '+sessionId);
+  media.stopFromBye(sessionId);
+}
 
 sip.init(kurentoPipelineRelease);
-media.init(config,sip);
+media.init(sip);
+
 var wss = new ws.Server({
     server : server,
     path : '/sip-gw'
@@ -92,12 +95,12 @@ wss.on('connection', function(ws) {
 
     ws.on('error', function(error) {
         console.log('Connection ' + sessionId + ' error');
-        stop(sessionId);
+        media.stop(sessionId);
     });
 
     ws.on('close', function() {
         console.log('Connection ' + sessionId + ' closed');
-        stop(sessionId);
+        media.stop(sessionId);
     });
 
     ws.on('message', function(_message) {
@@ -105,7 +108,7 @@ wss.on('connection', function(ws) {
         console.log('Connection ' + sessionId + ' received message ', message);
         switch (message.id) {
         case 'start':
-            MediaStack.start(sessionId, ws, message.from,message.to,message.sdpOffer, function(error, sdpAnswer) {
+            media.start(sessionId, ws, message.from,message.to,message.sdpOffer, function(error, sdpAnswer) {
                 if (error) {
                     return ws.send(JSON.stringify({
                         id : 'error',
@@ -119,13 +122,13 @@ wss.on('connection', function(ws) {
             });
             break;
         case 'stop':
-            MediaStack.stop(sessionId);
+            media.stop(sessionId);
             break;
         case 'onIceCandidate':
-            MediaStack.onIceCandidate(sessionId, message.candidate);
+            media.onIceCandidate(sessionId, message.candidate);
             break;
         case 'sendDtmf':
-            MediaStack.sendDtmf(sessionId, message.dtmf);
+            media.sendDtmf(sessionId, message.dtmf);
             break;
         default:
             ws.send(JSON.stringify({

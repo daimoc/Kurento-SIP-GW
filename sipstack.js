@@ -19,11 +19,8 @@ function getPortByType (sdpJson,type){
 }
 
 
-
 var SipStack = function () {};
-
    SipStack.appSip = drachtio();
-
 	 SipStack.dialogs = {};
 	 SipStack.sessionIds = {};
 	 SipStack.sessionIdByCalls = {};

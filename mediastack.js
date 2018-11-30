@@ -1,3 +1,4 @@
+var util = require('util');
 
 /*
  * Kurento media Stack
@@ -5,31 +6,31 @@
 
  var kurento = require('kurento-client');
  var transform = require('sdp-transform');
+ var config = require('./config');
+
 
 
  var MediaStack = function () {
-   this.sessions = {};
-   this.sip = null;
-   this.candidatesQueue = {};
-   this.kurentoClient = null;
-   this.config = null;
+   MediaStack.sessions = {};
+   MediaStack.sip = null;
+   MediaStack.candidatesQueue = {};
+   MediaStack.kurentoClient = null;
  };
 
- MediaStack.prototype.init = function (config,sip){
-   this.sip = null;
-   this.config=config;
+ MediaStack.prototype.init = function (sip){
+   MediaStack.sip = sip;
  }
 
  MediaStack.prototype.start = function (sessionId, ws, from,to, sdpOffer, callback) {
      if (!sessionId) {
          return callback('Cannot use undefined sessionId');
      }
-     this.sessions[sessionId]={
+     MediaStack.sessions[sessionId]={
        'ws': ws
      };
 
-    console.log(sessionId +"Concurent calls : " + Object.keys(sessions).length +"/"+ config.maxConcurentCalls + util.inspect(sessions) );
-     if(Object.keys(sessions).length > config.maxConcurentCalls){
+    console.log(sessionId +"Concurent calls : " + Object.keys(MediaStack.sessions).length +"/"+ config.maxConcurentCalls + util.inspect(MediaStack.sessions) );
+     if(Object.keys(MediaStack.sessions).length > config.maxConcurentCalls){
 
          return callback('Unable to start call due to server concurrent capacity limit');
      }
@@ -50,9 +51,9 @@
                      return callback(error);
                  }
                  console.log("Collect Candidates");
-                 if (this.candidatesQueue[sessionId]) {
-                     while(this.candidatesQueue[sessionId].length) {
-                         var candidate = this.candidatesQueue[sessionId].shift();
+                 if (MediaStack.candidatesQueue[sessionId]) {
+                     while(MediaStack.candidatesQueue[sessionId].length) {
+                         var candidate = MediaStack.candidatesQueue[sessionId].shift();
                          webRtcEndpoint.addIceCandidate(candidate);
                      }
                  }
@@ -77,8 +78,8 @@
                              pipeline.release();
                              return callback(error);
                          }
-                         this.sessions[sessionId].pipeline = pipeline;
-                         this.sessions[sessionId].webRtcEndpoint = webRtcEndpoint;
+                         MediaStack.sessions[sessionId].pipeline = pipeline;
+                         MediaStack.sessions[sessionId].webRtcEndpoint = webRtcEndpoint;
                          return callback(null, sdpAnswer);
                      });
 
@@ -95,8 +96,10 @@
 
 // Recover kurentoClient for the first time.
 function getKurentoClient(callback) {
-    if (kurentoClient !== null) {
-        return callback(null, kurentoClient);
+    console.log("Get Kurento Client ");
+    if (MediaStack.kurentoClient) {
+        console.log(" Kurento Client not null ");
+        return callback(null, MediaStack.kurentoClient);
     }
 
     kurento(config.kurento.ws_uri, function(error, _kurentoClient) {
@@ -105,14 +108,14 @@ function getKurentoClient(callback) {
             return callback("Could not find media server at address" + config.kurento.ws_uri
                     + ". Exiting with error " + error);
         }
-
-        kurentoClient = _kurentoClient;
-        callback(null, kurentoClient);
+        MediaStack.kurentoClient = _kurentoClient;
+        console.log(" Call Abck Kurento CLient ");
+        callback(null, MediaStack.kurentoClient);
     });
 }
 
 function getIPAddress() {
-  return this.config.serverPublicIP;
+  return config.serverPublicIP;
 }
 
 function replace_ip(sdp, ip) {
@@ -132,7 +135,7 @@ function replace_ip(sdp, ip) {
 function mungleSDP(sdp){
   mugleSdp = sdp;
   var mugleSdp =  sdp.replace(new RegExp("RTP/AVPF", "g"),  "RTP/AVP");
-  var h264Payload = this.sip.getH264Payload(sdp);
+  var h264Payload = MediaStack.sip.getH264Payload(sdp);
   mugleSdp+="a=fmtp:"+h264Payload+" profile-level-id=42801F\n";
   return mugleSdp;
 }
@@ -181,7 +184,7 @@ function createSipCall(sessionId,from,to,rtpEndpoint,callback){
       rtpEndpoint.generateOffer(function(error, sdpOffer) {
         var modSdp =  replace_ip(sdpOffer);
         modSdp = mungleSDP(modSdp);
-        this.sip.invite (sessionId,from,to,modSdp,function (error,remoteSdp){
+        MediaStack.sip.invite (sessionId,from,to,modSdp,function (error,remoteSdp){
           if (error){
             return callback(error);
           }
@@ -192,7 +195,7 @@ function createSipCall(sessionId,from,to,rtpEndpoint,callback){
             // Insert EnCall timeout
             setTimeout(function(){
               console.log("EndCall Timeout "+sessionId);
-              this.sip.bye(sessionId);stopFromBye(sessionId);}
+              MediaStack.sip.bye(sessionId);stopFromBye(sessionId);}
               ,config.maxCallSeconds*1000);
             return callback(null);
           });
@@ -201,58 +204,55 @@ function createSipCall(sessionId,from,to,rtpEndpoint,callback){
 }
 
 MediaStack.prototype.stop = function (sessionId) {
-    this.sip.bye(sessionId);
-    if (this.sessions[sessionId]) {
-        var pipeline = this.sessions[sessionId].pipeline;
+    MediaStack.sip.bye(sessionId);
+    if (MediaStack.sessions[sessionId]) {
+        var pipeline = MediaStack.sessions[sessionId].pipeline;
         if (pipeline != undefined){
           console.info('Releasing pipeline');
           pipeline.release();
         }
-        delete this.sessions[sessionId];
-        delete this.candidatesQueue[sessionId];
+        delete MediaStack.sessions[sessionId];
+        delete MediaStack.candidatesQueue[sessionId];
     }
 }
 
 MediaStack.prototype.stopFromBye =  function (sessionId) {
-    if (this.sessions[sessionId]) {
-      var ws = this.sessions[sessionId].ws;
+    if (MediaStack.sessions[sessionId]) {
+      var ws = MediaStack.sessions[sessionId].ws;
       if (ws != undefined){
         ws.send(JSON.stringify({
             id : 'stopFromBye'
         }));
       }
-      var pipeline = this.sessions[sessionId].pipeline;
+      var pipeline = MediaStack.sessions[sessionId].pipeline;
       if (pipeline != undefined){
         console.info('Releasing pipeline');
         pipeline.release();
       }
-      delete this.sessions[sessionId];
-      delete this.candidatesQueue[sessionId];
+      delete MediaStack.sessions[sessionId];
+      delete MediaStack.candidatesQueue[sessionId];
     }
 }
 
 MediaStack.prototype.onIceCandidate = function (sessionId, _candidate) {
     var candidate = kurento.getComplexType('IceCandidate')(_candidate);
-    if (this.sessions[sessionId]!=undefined && this.sessions[sessionId].webRtcEndpoint!=undefined) {
+    if (MediaStack.sessions[sessionId]!=undefined && MediaStack.sessions[sessionId].webRtcEndpoint!=undefined) {
         console.info('Sending candidate');
-        var webRtcEndpoint = sessions[sessionId].webRtcEndpoint;
+        var webRtcEndpoint = MediaStack.sessions[sessionId].webRtcEndpoint;
         webRtcEndpoint.addIceCandidate(candidate);
     }
     else {
         console.info('Queueing candidate');
-        if (!this.candidatesQueue[sessionId]) {
-            this.candidatesQueue[sessionId] = [];
+        if (!MediaStack.candidatesQueue[sessionId]) {
+            MediaStack.candidatesQueue[sessionId] = [];
         }
-        this.candidatesQueue[sessionId].push(candidate);
+        MediaStack.candidatesQueue[sessionId].push(candidate);
     }
 }
 
 function sendDtmf(sessionId, dtmf){
-    this.sip.infoDtmf(sessionId,dtmf);
+    MediaStack.sip.infoDtmf(sessionId,dtmf);
 }
 
-MediaStack.prototype.kurentoPipelineRelease = function (sessionId){
-  console.log('Stop session ID '+sessionId);
-  this.stopFromBye(sessionId);
-}
+
 module.exports = new MediaStack();
