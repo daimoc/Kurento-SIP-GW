@@ -67,7 +67,4 @@ $(document).ready(function() {
       $(that).removeClass("clicked");
     }, logoutPhase1);
   });
-
-
-
 });
