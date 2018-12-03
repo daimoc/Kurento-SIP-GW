@@ -332,7 +332,7 @@ input, button {
   transition: opacity 0.1s;
 }
 .app__logout-icon path {
-  stroke-width: 4px;
+  stroke-width: 2px;
   stroke-dasharray: 64.36235046386719;
   stroke-dashoffset: 64.36235046386719;
   -webkit-animation: animatePath 0.5s 0.5s forwards;
@@ -341,23 +341,27 @@ input, button {
 
 .mic {
   position: absolute;
-  bottom: 4.3rem;
+  bottom: 14.5rem;
   right: 3.3rem;
   width: 4.6rem;
   height: 4.6rem;
   margin-right: -2.3rem;
-  margin-bottom: 4.3rem;
-  background: #DFDFDF;
+  margin-bottom: -2.3rem;
+  background: #9C9C9C;
   color: #fff;
   font-size: 2rem;
   border-radius: 50%;
   cursor: pointer;
-  -webkit-transition: bottom 0.4s 0.1s, right 0.4s 0.1s, opacity 0.1s 0.7s, background-color 0.1s 0.7s, -webkit-transform 0.4s 0.4s;
-  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, opacity 0.1s 0.7s, background-color 0.1s 0.7s, -webkit-transform 0.4s 0.4s;
-  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, transform 0.4s 0.4s, opacity 0.1s 0.7s, background-color 0.1s 0.7s;
-  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, transform 0.4s 0.4s, opacity 0.1s 0.7s, background-color 0.1s 0.7s, -webkit-transform 0.4s 0.4s;
+  -webkit-transition: bottom 0.4s 0.1s, right 0.4s 0.1s, opacity 0.1s 0.7s,  -webkit-transform 0.4s 0.4s;
+  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, opacity 0.1s 0.7s, background-color 0.1s 0.2s, -webkit-transform 0.4s 0.4s;
+  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, transform 0.4s 0.4s, opacity 0.1s 0.7s;
+  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, transform 0.4s 0.4s, opacity 0.1s 0.7s, -webkit-transform 0.4s 0.4s;
   -webkit-transform: scale(0);
           transform: scale(0);
+}
+
+.mic:hover {
+    background-color: #eaeaea;
 }
 
 .micButton-icon{
@@ -376,7 +380,7 @@ input, button {
   opacity: 0.5;
 }
 .micButton-icon path {
-  stroke-width: 4px;
+  stroke-width: 1px;
   stroke-dasharray: 64.36235046386719;
   stroke-dashoffset: 64.36235046386719;
   -webkit-animation: animatePath 0.5s 0.5s forwards;
@@ -385,24 +389,29 @@ input, button {
 
 .video {
   position: absolute;
-  bottom: 5.3rem;
+  bottom: 9.5rem;
   right: 3.3rem;
   width: 4.6rem;
   height: 4.6rem;
   margin-right: -2.3rem;
-  margin-bottom: 10.3rem;
-  background: #DFDFDF;
+  margin-bottom: -2.3rem;
+  background: #9C9C9C;
   color: #fff;
   font-size: 2rem;
   border-radius: 50%;
   cursor: pointer;
-  -webkit-transition: bottom 0.4s 0.1s, right 0.4s 0.1s, opacity 0.1s 0.7s, background-color 0.1s 0.7s, -webkit-transform 0.4s 0.4s;
-  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, opacity 0.1s 0.7s, background-color 0.1s 0.7s, -webkit-transform 0.4s 0.4s;
-  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, transform 0.4s 0.4s, opacity 0.1s 0.7s, background-color 0.1s 0.7s;
-  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, transform 0.4s 0.4s, opacity 0.1s 0.7s, background-color 0.1s 0.7s, -webkit-transform 0.4s 0.4s;
+  -webkit-transition: bottom 0.4s 0.1s, right 0.4s 0.1s, opacity 0.1s 0.7s, -webkit-transform 0.4s 0.4s;
+  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, opacity 0.1s 0.7s, -webkit-transform 0.4s 0.4s;
+  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, transform 0.4s 0.4s, opacity 0.1s 0.7s;
+  transition: bottom 0.4s 0.1s, right 0.4s 0.1s, transform 0.4s 0.4s, opacity 0.1s 0.7s, -webkit-transform 0.4s 0.4s;
   -webkit-transform: scale(0);
           transform: scale(0);
 }
+
+.video:hover {
+    background-color: #eaeaea;
+}
+
 .videoButton-icon{
   position: absolute;
   width: 3rem;
@@ -418,7 +427,7 @@ input, button {
   opacity: 0.5;
 }
 .videoButton-icon path {
-  stroke-width: 4px;
+  stroke-width: 1px;
   stroke-dasharray: 64.36235046386719;
   stroke-dashoffset: 64.36235046386719;
   -webkit-animation: animatePath 0.5s 0.5s forwards;
@@ -437,6 +446,27 @@ input, button {
   -webkit-animation: animRipple 0.4s;
           animation: animRipple 0.4s;
   border-radius: 50%;
+}
+
+.disabled-icon {
+  position: absolute;
+  display: none;
+  width: 3rem;
+  height: 3rem;
+  top: 50%;
+  left: 50%;
+  margin-left: -1.5rem;
+  margin-top: -1.5rem;
+  -webkit-transition: opacity 0.1s;
+  transition: opacity 0.1s;
+}
+
+.disabled-icon path {
+  stroke-width: 3px;
+  stroke-dasharray: 64.36235046386719;
+  stroke-dashoffset: 64.36235046386719;
+  -webkit-animation: animatePath 0.1s 0.3s forwards;
+          animation: animatePath 0.1s 0.3s forwards;
 }
 
 @-webkit-keyframes animRipple {

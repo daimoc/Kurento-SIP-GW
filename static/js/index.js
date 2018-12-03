@@ -23,6 +23,9 @@ var pc;
 var state = null;
 var sender ;
 
+var audioTrack;
+var videoTrack;
+
 const I_CAN_START = 0;
 const I_CAN_STOP = 1;
 const I_AM_STARTING = 2;
@@ -36,6 +39,21 @@ window.onload = function() {
 	$('#alertButton').click(function(){
 		$("#alert").hide();
 	});
+
+	$('#micButton').click(function(){
+		if(audioTrack){
+			$("#micMuted").toggle();
+			audioTrack.enabled = !audioTrack.enabled;
+		}
+	});
+
+	$('#videoButton').click(function(){
+		if (videoTrack){
+			$("#videoMuted").toggle();
+			videoTrack.enabled = !videoTrack.enabled;
+		}
+	});
+
 }
 
 window.onbeforeunload = function() {
@@ -109,6 +127,16 @@ function start() {
 										pc.addStream(nStream);
 								}
 
+			  }
+				if ("getSenders" in  RTCPeerConnection.prototype){
+					var stream = pc.getSenders();
+					videoTrack = stream[0].getVideoTracks()[0];
+					audioTrack = stream[0].getAudioTracks()[0];
+				}
+				else {
+					var stream = pc.getLocalStreams();
+					videoTrack = stream[0].getVideoTracks()[0];
+					audioTrack = stream[0].getAudioTracks()[0];
 				}
         this.generateOffer(onOffer);
     });
