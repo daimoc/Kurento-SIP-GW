@@ -158,10 +158,8 @@ function createMediaElements(sessionId,pipeline, ws,from,to , callback) {
                 if (error) {
                   return callback(error);
                 }
-
                 return callback(null, webRtcEndpoint, rtpEndpoint);
             });
-
         });
     });
 }
@@ -250,7 +248,7 @@ MediaStack.prototype.onIceCandidate = function (sessionId, _candidate) {
     }
 }
 
-function sendDtmf(sessionId, dtmf){
+MediaStack.prototype.sendDtmf = function (sessionId, dtmf){
     MediaStack.sip.infoDtmf(sessionId,dtmf);
 }
 

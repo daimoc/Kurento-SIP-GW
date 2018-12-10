@@ -86,13 +86,18 @@ SipStack.prototype.invite = function (sessionId,from,to,localSDP,callback){
   console.log("Send invite to "+ sipDest);
 	console.log("Send  local SDP to "+ localSDP);
 
+	if (sipDest.indexOf("sip:")!=0)
+		sipDest="sip:"+sipDest;
+	if (from.indexOf("sip:")!=0)
+			from="sip:"+from;
+
   if (sipServerConnected){
     SipStack.appSip.request({
-              uri: "sip:"+sipDest,
+              uri: sipDest,
               method: 'INVITE',
               headers: {
                   'User-Agent': 'dracht.io',
-									'from': "sip:"+from
+									'from': from
               },
               body: localSDP
           },

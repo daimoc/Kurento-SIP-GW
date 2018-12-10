@@ -21,10 +21,14 @@ var videoOutput;
 var webRtcPeer;
 var pc;
 var state = null;
-var sender ;
+var inbandsender ;
 
+var defaultMute = false;
 var audioTrack;
 var videoTrack;
+
+var audioSender;
+var videoSender;
 
 const I_CAN_START = 0;
 const I_CAN_STOP = 1;
@@ -39,22 +43,70 @@ window.onload = function() {
 	$('#alertButton').click(function(){
 		$("#alert").hide();
 	});
-
 	$('#micButton').click(function(){
 		if(audioTrack){
-			$("#micMuted").toggle();
-			audioTrack.enabled = !audioTrack.enabled;
+			toggleAudio();
 		}
 	});
-
 	$('#videoButton').click(function(){
 		if (videoTrack){
-			$("#videoMuted").toggle();
-			videoTrack.enabled = !videoTrack.enabled;
+			toggleVideo();
 		}
 	});
-
 }
+
+function toggleAudio(){
+	$("#micMuted").toggle();
+	if (defaultMute){
+		audioTrack.enabled = !audioTrack.enabled;
+	}
+	else {
+		var sender = getAudioSender();
+		if (sender == null)
+			audioSender.replaceTrack(audioTrack);
+		else {
+			audioSender.replaceTrack(null)
+		}
+	}
+}
+
+function toggleVideo(){
+	$("#videoMuted").toggle();
+	if (defaultMute){
+		videoTrack.enabled = !videoTrack.enabled;
+	}
+	else {
+		var sender = getVideoSender();
+		if (sender == null)
+			videoSender.replaceTrack(videoTrack);
+		else {
+			videoSender.replaceTrack(null)
+		}
+	}
+}
+
+function getAudioSender(){
+	var sender = null;
+	var senders = pc.getSenders();
+	for (var i = 0 ;i<senders.length;i++){
+		if (senders[i].track == audioTrack){
+			sender=senders[i];
+		}
+	}
+	return sender;
+}
+
+function getVideoSender(){
+	var sender = null;
+	var senders = pc.getSenders();
+	for (var i = 0 ;i<senders.length;i++){
+		if (senders[i].track == videoTrack){
+			sender=senders[i];
+		}
+	}
+	return sender;
+}
+
 
 window.onbeforeunload = function() {
 	ws.close();
@@ -113,14 +165,14 @@ function start() {
 										// Firefox Version
 										var stream = pc.getSenders();
 										var track = stream[0];
-										sender = new DTMFSenderInband(stream[0]);
+										inbandsender = new DTMFSenderInband(stream[0]);
 									}
 									else {
 										// Chrome Opera version
 										var stream = pc.getLocalStreams();
 										var videoTracks = stream[0].getVideoTracks();
-										sender = new DTMFSenderInband(stream[0]);
-										var audioTracks = sender.outputStream.getAudioTracks()
+										inbandsender = new DTMFSenderInband(stream[0]);
+										var audioTracks = inbandsender.outputStream.getAudioTracks()
 										pc.removeStream(stream[0]);
 										var newTracks = [videoTracks[0],audioTracks[0]];
 										var nStream = new MediaStream(newTracks);
@@ -129,15 +181,18 @@ function start() {
 
 			  }
 				if ("getSenders" in  RTCPeerConnection.prototype){
-					var stream = pc.getSenders();
-					videoTrack = stream[0].getVideoTracks()[0];
-					audioTrack = stream[0].getAudioTracks()[0];
+					var RTCPSender = pc.getSenders();
+					videoTrack = RTCPSender[1].track;
+					audioTrack = RTCPSender[0].track;
 				}
 				else {
 					var stream = pc.getLocalStreams();
 					videoTrack = stream[0].getVideoTracks()[0];
 					audioTrack = stream[0].getAudioTracks()[0];
 				}
+
+				audioSender = getAudioSender();
+				videoSender = getVideoSender();
         this.generateOffer(onOffer);
     });
 }
@@ -230,7 +285,7 @@ function sendDtmf(event){
 			}
 		}
 		if(dtmfTransport=="inband"){
-			  sender.insertDTMF(dtmfValue,400,50);
+			  inbandsender.insertDTMF(dtmfValue,400,50);
 		}
 
 }
