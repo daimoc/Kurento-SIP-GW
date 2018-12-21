@@ -80,6 +80,7 @@ var util = require('util');
                          }
                          MediaStack.sessions[sessionId].pipeline = pipeline;
                          MediaStack.sessions[sessionId].webRtcEndpoint = webRtcEndpoint;
+                         MediaStack.sessions[sessionId].rtpEndpoint = rtpEndpoint;
                          return callback(null, sdpAnswer);
                      });
 
@@ -178,6 +179,20 @@ function connectMediaElements(webRtcEndpoint, rtpEndpoint,callback) {
     });
 }
 
+
+function reConnectMediaElements(sessionId) {
+    var webRtcEndpoint = MediaStack.sessions[sessionId].webRtcEndpoint;
+    var rtpEndpoint = MediaStack.sessions[sessionId].rtpEndpoint;
+    rtpEndpoint.connect(webRtcEndpoint, function(error) {
+        if (!error) {
+          webRtcEndpoint.connect(rtpEndpoint,function (error){
+            console.log("Reconnect Media  "+sessionId);
+          });
+        }
+    });
+}
+
+
 function createSipCall(sessionId,from,to,rtpEndpoint,callback){
       rtpEndpoint.generateOffer(function(error, sdpOffer) {
         var modSdp =  replace_ip(sdpOffer);
@@ -250,6 +265,7 @@ MediaStack.prototype.onIceCandidate = function (sessionId, _candidate) {
 
 MediaStack.prototype.sendDtmf = function (sessionId, dtmf){
     MediaStack.sip.infoDtmf(sessionId,dtmf);
+    reConnectMediaElements(sessionId);
 }
 
 

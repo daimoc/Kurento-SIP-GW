@@ -23,7 +23,7 @@ var pc;
 var state = null;
 var inbandsender ;
 
-var defaultMute = false;
+var defaultMute = true;
 var audioTrack;
 var videoTrack;
 

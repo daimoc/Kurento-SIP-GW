@@ -11,11 +11,11 @@
     "express-session": "~1.10.3",
     "minimist": "^1.1.1",
     "ws": "~1.0.1",
-    "kurento-client": "6.6.0",
-    "drachtio":"1.0.16",
-    "sdp-transform":"*",
-    "tree-kill":"*",
-    "uuid":"*"
+    "kurento-client": "6.9.0",
+    "drachtio": "1.0.16",
+    "sdp-transform": "*",
+    "tree-kill": "*",
+    "uuid": "*"
   },
   "devDependencies": {
     "bower": "^1.4.1"
