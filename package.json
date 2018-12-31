@@ -12,7 +12,7 @@
     "minimist": "^1.1.1",
     "ws": "~1.0.1",
     "kurento-client": "6.9.0",
-    "drachtio": "1.0.16",
+    "drachtio": "4.1.16",
     "sdp-transform": "*",
     "tree-kill": "*",
     "uuid": "*"
