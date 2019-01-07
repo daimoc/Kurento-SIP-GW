@@ -23,7 +23,7 @@ var pc;
 var state = null;
 var inbandsender ;
 
-var defaultMute = true;
+var defaultMute = false;
 var audioTrack;
 var videoTrack;
 
@@ -33,6 +33,10 @@ var videoSender;
 const I_CAN_START = 0;
 const I_CAN_STOP = 1;
 const I_AM_STARTING = 2;
+
+
+var streamBlack;
+var videoMuted;
 
 window.onload = function() {
 	console.log('Page loaded ...');
@@ -53,6 +57,14 @@ window.onload = function() {
 			toggleVideo();
 		}
 	});
+  var canvas = document.getElementById('canvasBlack');
+	var ctx = canvas.getContext("2d");
+	ctx.fillStyle = "#FF0000";
+	ctx.fillRect(0, 0, 10, 10);
+
+	streamBlack = canvas.captureStream().getVideoTracks()[0];
+
+  videoMuted = false;
 }
 
 function toggleAudio(){
@@ -69,7 +81,6 @@ function toggleAudio(){
 		}
 	}
 }
-
 function toggleVideo(){
 	$("#videoMuted").toggle();
 	if (defaultMute){
@@ -77,10 +88,13 @@ function toggleVideo(){
 	}
 	else {
 		var sender = getVideoSender();
-		if (sender == null)
-			videoSender.replaceTrack(videoTrack);
+		//videoTrack.enabled = !videoTrack.enabled;
+		videoMuted = !videoMuted;
+		//if (sender == null)
+		if (!videoMuted)
+			videoSender.replaceTrack(videoTrack)
 		else {
-			videoSender.replaceTrack(null)
+			videoSender.replaceTrack(streamBlack);
 		}
 	}
 }
@@ -125,7 +139,6 @@ ws.onmessage = function(message) {
 			setState(I_CAN_START);
 		}
 		onError('Error message from server: ' + parsedMessage.message);
-		 //set timeout  $("#stop").trigger("click");
 		 setTimeout(function(){$("#stop").trigger("click");},2000);
 		break;
 	case 'iceCandidate':
@@ -200,7 +213,6 @@ function start() {
 
 function onIceCandidate(candidate) {
 	   console.log('Local candidate' + JSON.stringify(candidate));
-
 	   var message = {
 	      id : 'onIceCandidate',
 	      candidate : candidate
@@ -210,8 +222,6 @@ function onIceCandidate(candidate) {
 
 function onOffer(error, offerSdp) {
 	if(error) return onError(error);
-
-
 	console.info('Invoking SDP offer callback function ' + location.host);
 	var message = {
 		id : 'start',
@@ -232,13 +242,14 @@ function startResponse(message) {
 	setState(I_CAN_STOP);
 	console.log('SDP answer received from server. Processing ...');
 	webRtcPeer.processAnswer(message.sdpAnswer,onAnswerProcess);
+	hideSpinner(videoInput, videoOutput);
 }
 
 function onAnswerProcess(){
 	if (senderDTMFInband)
 		senderDTMFInband.dtmf.ontonechange = function(e) {
 								console.log(JSON.stringify(e));
-							}
+		}
 }
 
 function stop() {
@@ -253,7 +264,7 @@ function stop() {
 		}
 		sendMessage(message);
 	}
-  hideSpinner(videoInput, videoOutput);
+  displayEndPoster(videoInput, videoOutput);
 }
 
 function setState(nextState) {
@@ -310,6 +321,13 @@ function showSpinner() {
 }
 
 function hideSpinner() {
+	for (var i = 0; i < arguments.length; i++) {
+		arguments[i].poster = '';
+		arguments[i].style.background = '';
+	}
+}
+
+function displayEndPoster() {
 	for (var i = 0; i < arguments.length; i++) {
 		arguments[i].src = '';
 		arguments[i].poster = './img/webrtc.png';

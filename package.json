@@ -15,7 +15,8 @@
     "drachtio": "4.1.16",
     "sdp-transform": "*",
     "tree-kill": "*",
-    "uuid": "*"
+    "uuid": "*",
+    
   },
   "devDependencies": {
     "bower": "^1.4.1"

@@ -208,7 +208,9 @@ function createSipCall(sessionId,from,to,rtpEndpoint,callback){
             // Insert EnCall timeout
             setTimeout(function(){
               console.log("EndCall Timeout "+sessionId);
-              MediaStack.sip.bye(sessionId);stopFromBye(sessionId);}
+              MediaStack.sip.bye(sessionId);
+              MediaStack.stopFromBye(sessionId);
+            }
               ,config.maxCallSeconds*1000);
             return callback(null);
           });
@@ -265,7 +267,7 @@ MediaStack.prototype.onIceCandidate = function (sessionId, _candidate) {
 
 MediaStack.prototype.sendDtmf = function (sessionId, dtmf){
     MediaStack.sip.infoDtmf(sessionId,dtmf);
-    reConnectMediaElements(sessionId);
+    //reConnectMediaElements(sessionId);
 }
 
 

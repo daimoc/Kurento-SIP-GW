@@ -58,10 +58,10 @@ input, button {
 
 .demo_app {
   position: absolute;
-  top: 5%;
-  left: 5%;
-  width: 90%;
-  height: 90%;
+  top: 0%;
+  left: 2%;
+  width: 96%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -256,21 +256,29 @@ input, button {
   padding: 6rem 1.5rem 2rem;
   text-align: center;
 }
+
+.main_display {
+  position: absolute;
+  height: 100%;
+  width: 85%;
+  top : 0;
+}
+
 .app__video_remote {
   position: absolute;
-  height: 90%;
-  top : 5%;
-  left: 5%;
-  background: #fff;
-
+  height: 99%;
+  width: 100%;
+  top : 0.5%;
+  background: #0000;
 }
+
 .app__video_local {
   position: absolute;
-  height: 20%;
-  top: 70%;
-  right: 5%;
+  width: 10%;
+  bottom: 5%;
+  right: 64px;
   z-index: 2;
-  background: #fff;
+  background: #0000;
 }
 
 .btndtmf {
@@ -287,11 +295,12 @@ input, button {
   position: absolute;
   height: 20%;
   top: 10%;
-  right: 15%;
+  right: 11%;
 }
 
 .app__logout {
   position: absolute;
+  z-index: 3;
   bottom: 3.3rem;
   right: 3.3rem;
   width: 4.6rem;
@@ -341,6 +350,7 @@ input, button {
 
 .mic {
   position: absolute;
+  z-index: 3;
   bottom: 14.5rem;
   right: 3.3rem;
   width: 4.6rem;
@@ -389,6 +399,7 @@ input, button {
 
 .video {
   position: absolute;
+  z-index: 3;
   bottom: 9.5rem;
   right: 3.3rem;
   width: 4.6rem;
@@ -467,6 +478,12 @@ input, button {
   stroke-dashoffset: 64.36235046386719;
   -webkit-animation: animatePath 0.1s 0.3s forwards;
           animation: animatePath 0.1s 0.3s forwards;
+}
+
+.btn-default1 {
+  color: #333;
+  background-color: #a9a6a6;
+  border-color: #0a0a0a;
 }
 
 @-webkit-keyframes animRipple {

@@ -16,6 +16,15 @@
 
   <script src="bower_components/kurento-utils/js/kurento-utils.js"></script>
 
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script src="js/config_client.js"></script>
+  <script src="js/index_app.js"></script>
+  <script src="js/index.js"></script>
+  <script src="bower_components/adapter.js/release/adapter.js"></script>
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="js/DTMFSenderInband.js"></script>
+
 </head>
 
 <body>
@@ -51,29 +60,34 @@
     </div>
     <div class="app">
       <div class="app__top">
+         <canvas id="canvasBlack" width="10" height="10"  style="display: none ;position: absolute;right: 5px;border:1px solid #000000; background-color:blue;" ></canvas>
+
          <video class="app__video_local" id="videoInput" autoplay poster="img/webrtc.png"></video>
-         <video class="app__video_remote" id="videoOutput" autoplay poster="img/webrtc.png"></video>
+
+         <div class="main_display">
+           <video class="app__video_remote" id="videoOutput" autoplay poster="img/webrtc.png"></video>
+         </div>
          <div class="dialpad">
          <table class="app__dialpad">
               <tr>
-                <th><button type="button" class="btndtmf btn btn-default"> # </button></th>
-                <th><button type="button" class="btndtmf btn btn-default"> 0 </button></th>
-                <th><button type="button" class="btndtmf btn btn-default"> * </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> # </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> 0 </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> * </button></th>
               </tr>
               <tr>
-                <th><button type="button" class="btndtmf btn btn-default"> 1 </button></th>
-                <th><button type="button" class="btndtmf btn btn-default"> 2 </button></th>
-                <th><button type="button" class="btndtmf btn btn-default"> 3 </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> 1 </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> 2 </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> 3 </button></th>
               </tr>
               <tr>
-                <th><button type="button" class="btndtmf btn btn-default"> 4 </button></th>
-                <th><button type="button" class="btndtmf btn btn-default"> 5 </button></th>
-                <th><button type="button" class="btndtmf btn btn-default"> 6 </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> 4 </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> 5 </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> 6 </button></th>
               </tr>
               <tr>
-                <th><button type="button" class="btndtmf btn btn-default"> 7 </button></th>
-                <th><button type="button" class="btndtmf btn btn-default"> 8 </button></th>
-                <th><button type="button" class="btndtmf btn btn-default"> 9 </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> 7 </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> 8 </button></th>
+                <th><button type="button" class="btndtmf btn btn-default1"> 9 </button></th>
 
               </tr>
            </table>
@@ -105,14 +119,7 @@
   </div>
 </div>
 
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-  <script src="js/config_client.js"></script>
-  <script src="js/index_app.js"></script>
-  <script src="js/index.js"></script>
-  <script src="bower_components/adapter.js/adapter.js"></script>
-  <script src="bower_components/jquery/dist/jquery.min.js"></script>
-  <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-  <script src="js/DTMFSenderInband.js"></script>
+
 
 </body>
 </html>
