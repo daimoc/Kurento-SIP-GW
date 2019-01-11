@@ -38,6 +38,10 @@ const I_AM_STARTING = 2;
 var streamBlack;
 var videoMuted;
 
+var callFrom;
+var callTo;
+
+
 window.onload = function() {
 	console.log('Page loaded ...');
 	videoInput = document.getElementById('videoInput');
@@ -59,7 +63,7 @@ window.onload = function() {
 	});
   var canvas = document.getElementById('canvasBlack');
 	var ctx = canvas.getContext("2d");
-	ctx.fillStyle = "#FF0000";
+	ctx.fillStyle = "#000000";
 	ctx.fillRect(0, 0, 10, 10);
 
 	streamBlack = canvas.captureStream().getVideoTracks()[0];
@@ -155,8 +159,11 @@ ws.onmessage = function(message) {
 	}
 }
 
-function start() {
+function start(from,to) {
 	console.log('Starting video call ...')
+
+	callTo = to;
+	callFrom = from;
 
 	// Disable start button
 	setState(I_AM_STARTING);
@@ -226,8 +233,8 @@ function onOffer(error, offerSdp) {
 	var message = {
 		id : 'start',
 		sdpOffer : offerSdp,
-		to : $("#to").val(),
-		from : $("#from").val()
+		to : callTo,
+		from : callFrom
 	}
 	sendMessage(message);
 }

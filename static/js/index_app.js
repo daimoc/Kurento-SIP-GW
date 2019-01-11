@@ -1,4 +1,42 @@
+function getUrlParams(search) {
+    let hashes = search.slice(search.indexOf('?') + 1).split('&')
+    let params = {}
+    hashes.map(hash => {
+        let [key, val] = hash.split('=')
+        params[key] = decodeURIComponent(val)
+    })
+
+    return params
+}
+
+String.prototype.sansAccent = function(){
+    var accent = [
+        /[\300-\306]/g, /[\340-\346]/g, // A, a
+        /[\310-\313]/g, /[\350-\353]/g, // E, e
+        /[\314-\317]/g, /[\354-\357]/g, // I, i
+        /[\322-\330]/g, /[\362-\370]/g, // O, o
+        /[\331-\334]/g, /[\371-\374]/g, // U, u
+        /[\321]/g, /[\361]/g, // N, n
+        /[\307]/g, /[\347]/g, // C, c
+    ];
+    var noaccent = ['A','a','E','e','I','i','O','o','U','u','N','n','C','c'];
+
+    var str = this;
+    for(var i = 0; i < accent.length; i++){
+        str = str.replace(accent[i], noaccent[i]);
+    }
+
+    return str;
+}
+
 $(document).ready(function() {
+
+  var param = getUrlParams(window.location.search);
+  var autojoin = param['autojoin'];
+
+  $("#to").val(param['to']);
+  $("#from").val(param['from']);
+
 
   var animating = false,
       submitPhase1 = 1100,
@@ -18,8 +56,22 @@ $(document).ready(function() {
     elem.append($ripple);
   };
 
+  if (autojoin){
+    setTimeout(function() {
+      document.getElementById('start_call').click();
+    }, 2000);
+  }
+
   $(document).on("click", ".login__submit", function(e) {
-    start();
+
+
+    var to = $("#to").val();
+    var from = $("#from").val();
+    if (!from)
+      from="anonymous";
+    from = from.sansAccent();
+    start(from,to);
+
     if (animating) return;
     animating = true;
     var that = this;
