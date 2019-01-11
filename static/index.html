@@ -62,8 +62,10 @@
       <div class="app__top">
          <canvas id="canvasBlack" width="10" height="10"  style="display: none ;position: absolute;right: 5px;border:1px solid #000000; background-color:blue;" ></canvas>
 
-         <video class="app__video_local" id="videoInput" autoplay poster="img/webrtc.png"></video>
-
+         <div class="small_display">
+            <video class="app__video_local" id="videoInput" autoplay poster="img/webrtc.png"></video>
+            <p class="app_video_local_muted"> Video Muted </p>
+        </div>
          <div class="main_display">
            <video class="app__video_remote" id="videoOutput" autoplay poster="img/webrtc.png"></video>
          </div>

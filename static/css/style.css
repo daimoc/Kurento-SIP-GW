@@ -272,13 +272,28 @@ input, button {
   background: #0000;
 }
 
-.app__video_local {
+.small_display{
   position: absolute;
   width: 10%;
   bottom: 5%;
   right: 64px;
   z-index: 2;
+}
+
+.app_video_local_muted{
+    margin: 0 0 10px;
+    font-size: 2vw;
+    color: white;
+    z-index: 3;
+    top: 10%;
+    width: 100%;
+    position: absolute;
+    display: none;
+}
+
+.app__video_local {
   background: #0000;
+  width: 100%;
 }
 
 .btndtmf {

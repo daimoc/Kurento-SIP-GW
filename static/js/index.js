@@ -87,6 +87,7 @@ function toggleAudio(){
 }
 function toggleVideo(){
 	$("#videoMuted").toggle();
+	$(".app_video_local_muted").toggle();
 	if (defaultMute){
 		videoTrack.enabled = !videoTrack.enabled;
 	}
@@ -271,6 +272,12 @@ function stop() {
 		}
 		sendMessage(message);
 	}
+
+	$("#micMuted").hide();
+	$("#videoMuted").hide();
+	$(".app_video_local_muted").hide();
+	videoMuted=false;
+
   displayEndPoster(videoInput, videoOutput);
 }
 

@@ -57,6 +57,7 @@ $(document).ready(function() {
   };
 
   if (autojoin){
+    autojoin = false;
     setTimeout(function() {
       document.getElementById('start_call').click();
     }, 2000);
