@@ -152,6 +152,9 @@ ws.onmessage = function(message) {
 	case 'stopFromBye':
 			 $("#stop").trigger("click");
 		break;
+	case 'renegotiateWebRTC':
+		renegotiate(parsedMessage);
+		break;
 	default:
 		if (state == I_AM_STARTING) {
 			setState(I_CAN_START);
@@ -319,6 +322,72 @@ function handleToneChangeEvent(event) {
 	if (event.tone !== "") {
 	    console.log("Tone played: " + event.tone);
 	}
+}
+
+
+function renegotiate(message) {
+	console.log('PeerConnection renogotioation received from server');
+
+	webRtcPeer.dispose();
+
+	setTimeout(function(){
+	var remoteSdp = message.sdp;
+	var options = {
+		localVideo: videoInput,
+		remoteVideo: videoOutput,
+		onicecandidate : onIceCandidate
+	}
+
+	webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options, function(error) {
+			if(error) return onError(error);
+			pc = webRtcPeer.peerConnection;
+			if(dtmfTransport=="inband"){
+							if ("getSenders" in  RTCPeerConnection.prototype){
+									// Firefox Version
+									var stream = pc.getSenders();
+									var track = stream[0];
+									inbandsender = new DTMFSenderInband(stream[0]);
+								}
+								else {
+									// Chrome Opera version
+									var stream = pc.getLocalStreams();
+									var videoTracks = stream[0].getVideoTracks();
+									inbandsender = new DTMFSenderInband(stream[0]);
+									var audioTracks = inbandsender.outputStream.getAudioTracks()
+									pc.removeStream(stream[0]);
+									var newTracks = [videoTracks[0],audioTracks[0]];
+									var nStream = new MediaStream(newTracks);
+									pc.addStream(nStream);
+							}
+
+			}
+			if ("getSenders" in  RTCPeerConnection.prototype){
+				var RTCPSender = pc.getSenders();
+				videoTrack = RTCPSender[1].track;
+				audioTrack = RTCPSender[0].track;
+			}
+			else {
+				var stream = pc.getLocalStreams();
+				videoTrack = stream[0].getVideoTracks()[0];
+				audioTrack = stream[0].getAudioTracks()[0];
+			}
+
+			audioSender = getAudioSender();
+			videoSender = getVideoSender();
+			this.processOffer(remoteSdp,onAnswer);
+	});},500);
+
+}
+
+
+function onAnswer(error, answerSdp){
+	if(error) return onError(error);
+	console.info('Invoking SDP offer callback function ' + location.host);
+	var message = {
+		id : 'renegotiateResponse',
+		answerSdp : answerSdp
+	}
+	sendMessage(message);
 }
 
 function sendMessage(message) {

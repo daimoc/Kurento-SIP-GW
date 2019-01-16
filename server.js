@@ -72,6 +72,10 @@ function kurentoPipelineRelease(sessionId){
 
 sip.init(kurentoPipelineRelease);
 media.init(sip);
+sip.setMediaSatck(media);
+
+
+
 
 var wss = new ws.Server({
     server : server,
@@ -129,6 +133,9 @@ wss.on('connection', function(ws) {
             break;
         case 'sendDtmf':
             media.sendDtmf(sessionId, message.dtmf);
+            break;
+        case 'renegotiateResponse':
+            media.renegotiateResponse(sessionId,message.answerSdp);
             break;
         default:
             ws.send(JSON.stringify({

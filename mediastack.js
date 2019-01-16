@@ -11,6 +11,7 @@ var util = require('util');
 
 
  var MediaStack = function () {
+   MediaStack.id ="bob";
    MediaStack.sessions = {};
    MediaStack.sip = null;
    MediaStack.candidatesQueue = {};
@@ -183,6 +184,7 @@ function connectMediaElements(webRtcEndpoint, rtpEndpoint,callback) {
 function reConnectMediaElements(sessionId) {
     var webRtcEndpoint = MediaStack.sessions[sessionId].webRtcEndpoint;
     var rtpEndpoint = MediaStack.sessions[sessionId].rtpEndpoint;
+
     rtpEndpoint.connect(webRtcEndpoint, function(error) {
         if (!error) {
           webRtcEndpoint.connect(rtpEndpoint,function (error){
@@ -267,7 +269,106 @@ MediaStack.prototype.onIceCandidate = function (sessionId, _candidate) {
 
 MediaStack.prototype.sendDtmf = function (sessionId, dtmf){
     MediaStack.sip.infoDtmf(sessionId,dtmf);
-    //reConnectMediaElements(sessionId);
+  //  reConnectMediaElements(sessionId);
+}
+
+MediaStack.prototype.reconnect = function (sessionId){
+    reConnectMediaElements(sessionId);
+}
+
+MediaStack.prototype.renegotiateWebRTC = function (sessionId,callback){
+  if (MediaStack.sessions[sessionId] && MediaStack.sessions[sessionId].pipeline){
+    var pipeline = MediaStack.sessions[sessionId].pipeline;
+
+    MediaStack.sessions[sessionId].webRtcEndpoint.release();
+    pipeline.create('WebRtcEndpoint', function(error, webRtcEndpoint){
+        if (error) {
+            return callback(error);
+        }
+        MediaStack.sessions[sessionId].webRtcEndpoint = webRtcEndpoint;
+        webRtcEndpoint.generateOffer(function(error,sdpOffer) {
+              if (error){
+                console.log("SdpOffer not accepted by kurento");
+                console.log(error);
+                return callback(error);
+              }
+              var ws = MediaStack.sessions[sessionId].ws;
+              if (ws != undefined){
+                ws.send(JSON.stringify({
+                    id : 'renegotiateWebRTC',
+                    sdp : sdpOffer
+                }));
+                return callback();
+              }
+          });
+        });
+    };
+}
+
+MediaStack.prototype.renegotiateResponse = function (sessionId,sdp){
+    if (MediaStack.sessions[sessionId] && MediaStack.sessions[sessionId].pipeline && MediaStack.sessions[sessionId].webRtcEndpoint){
+      var webRtcEndpoint =  MediaStack.sessions[sessionId].webRtcEndpoint;
+      var pipeline = MediaStack.sessions[sessionId].pipeline;
+      console.log("Collect Candidates");
+      if (MediaStack.candidatesQueue[sessionId]) {
+          while(MediaStack.candidatesQueue[sessionId].length) {
+              var candidate = MediaStack.candidatesQueue[sessionId].shift();
+              webRtcEndpoint.addIceCandidate(candidate);
+          }
+      }
+
+      var ws = MediaStack.sessions[sessionId].ws;
+      webRtcEndpoint.on('OnIceCandidate', function(event) {
+          var candidate = kurento.getComplexType('IceCandidate')(event.candidate);
+          ws.send(JSON.stringify({
+              id : 'iceCandidate',
+              candidate : candidate
+          }));
+      });
+
+      webRtcEndpoint.processAnswer(sdp, function(error) {
+          if (error) {
+              pipeline.release();
+              console.log("ProcessAnswer Error"+error);
+          }
+          reConnectMediaElements(sessionId)
+          return;
+      });
+
+      webRtcEndpoint.gatherCandidates(function(error) {
+          if (error) {
+            console.log("gatherCandidates Error"+error);
+          }
+      });
+    }
+}
+
+MediaStack.prototype.renegotiateRTP = function (sessionId, remoteSdp,callback){
+  if (MediaStack.sessions[sessionId] && MediaStack.sessions[sessionId].pipeline){
+    var pipeline = MediaStack.sessions[sessionId].pipeline;
+
+    MediaStack.sessions[sessionId].rtpEndpoint.release();
+
+    pipeline.create('RtpEndpoint', function(error, rtpEndpoint){
+        if (error) {
+            return callback(error);
+        }
+        rtpEndpoint.processOffer(remoteSdp,function(error,sdpOffer) {
+              if (error){
+                console.log("SdpOffer not accepted by kurento");
+                console.log(error);
+                return callback(error);
+              }
+              var modSdp =  replace_ip(sdpOffer);
+              modSdp = mungleSDP(modSdp);
+              MediaStack.sessions[sessionId].rtpEndpoint = rtpEndpoint;
+
+              return callback(modSdp);
+          });
+        });
+    };
+
+
 }
 
 

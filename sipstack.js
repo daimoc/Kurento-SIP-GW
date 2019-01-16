@@ -26,6 +26,7 @@ var SipStack = function () {};
 	 SipStack.sessionIdByCalls = {};
 	 SipStack.requests = {};
 	 SipStack.localSDP = {};
+	 SipStack.mediastack = null;
 	 SipStack.prototype.log = function () {
 			 console.log('doo!');
 	 }
@@ -52,16 +53,28 @@ var SipStack = function () {};
     }) ;
 
 	SipStack.appSip.use('invite', function( req, res){
-    	console.log('INviTE recieved: %s', JSON.stringify(res) ) ;
+    	console.log('INviTE recieved: %s', JSON.stringify(res),JSON.stringify(req.body) ) ;
     	var callId = res.msg.headers['call-id'];
-    	console.log('INVITE recieved: %s index %s' , JSON.stringify(res),callId ) ;
+    //	console.log('INVITE recieved: %s index %s' , JSON.stringify(req),callId ) ;
 			// get sessionId
+
+
 			var sessionId = SipStack.sessionIdByCalls[callId];
 			if (sessionId){
+				var remoteSdpStr = req.body;
 				var dialog =  SipStack.dialogs[sessionId];
-				res.send( 200,{
-        	body: SipStack.localSDP[sessionId]
-    		}) ;
+				SipStack.mediastack.renegotiateRTP(sessionId,remoteSdpStr,function(newLocalSdp){
+					res.send( 200,{
+						body: newLocalSdp
+					},function(err, response){
+						if (!err){
+								SipStack.mediastack.renegotiateWebRTC(sessionId,function(err){
+									if (!err)
+										SipStack.mediastack.reconnect(sessionId);
+								});
+						}
+					});
+				});
 			}
 			else
 				res.send(404) ;
@@ -82,7 +95,11 @@ SipStack.prototype.init = function (callback){
 }
 
 SipStack.prototype.invite = function (sessionId,from,to,localSDP,callback){
-  var sipDest = to;
+
+
+	console.log('Mediastack in sip id=' + SipStack.mediastack.id);
+
+	var sipDest = to;
   console.log("Send invite to "+ sipDest);
 	console.log("Send  local SDP to "+ localSDP);
 
@@ -242,6 +259,12 @@ function getH264Payload(sdp){
 
 	return h264Payload;
 }
+
+
+SipStack.prototype.setMediaSatck = function (media){
+	SipStack.mediastack = media;
+}
+
 
 /*Asuming a classic sdp with media[1] as the only video media*/
 SipStack.prototype.getH264Payload = getH264Payload;
