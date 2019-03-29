@@ -41,6 +41,19 @@ var videoMuted;
 var callFrom;
 var callTo;
 
+var mediaConstraintsOption =  {
+				audio: true,
+				video: true
+				//{
+
+	//					mediaSource: "window", // whole screen sharing
+	///					width: {max: '800'},
+		//				height: {max: '600'},
+	//					frameRate: {max: '5'}
+
+				//}
+		}
+
 
 window.onload = function() {
 	console.log('Page loaded ...');
@@ -178,7 +191,10 @@ function start(from,to) {
     var options = {
       localVideo: videoInput,
       remoteVideo: videoOutput,
-      onicecandidate : onIceCandidate
+      onicecandidate : onIceCandidate,
+
+			mediaConstraints : mediaConstraintsOption
+
     }
 
     webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options, function(error) {
@@ -234,11 +250,14 @@ function onIceCandidate(candidate) {
 function onOffer(error, offerSdp) {
 	if(error) return onError(error);
 	console.info('Invoking SDP offer callback function ' + location.host);
+	var optionsObj = {renegotiate:"rtp"};
+
 	var message = {
 		id : 'start',
 		sdpOffer : offerSdp,
 		to : callTo,
-		from : callFrom
+		from : callFrom,
+		options : optionsObj
 	}
 	sendMessage(message);
 }
@@ -335,7 +354,8 @@ function renegotiate(message) {
 	var options = {
 		localVideo: videoInput,
 		remoteVideo: videoOutput,
-		onicecandidate : onIceCandidate
+		onicecandidate : onIceCandidate,
+		mediaConstraints : mediaConstraintsOption
 	}
 
 	webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options, function(error) {
@@ -375,7 +395,7 @@ function renegotiate(message) {
 			audioSender = getAudioSender();
 			videoSender = getVideoSender();
 			this.processOffer(remoteSdp,onAnswer);
-	});},500);
+	});},10);
 
 }
 

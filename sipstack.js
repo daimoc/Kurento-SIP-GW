@@ -22,10 +22,12 @@ function getPortByType (sdpJson,type){
 var SipStack = function () {};
    SipStack.appSip = drachtio();
 	 SipStack.dialogs = {};
+	 SipStack.res = {};
 	 SipStack.sessionIds = {};
 	 SipStack.sessionIdByCalls = {};
 	 SipStack.requests = {};
 	 SipStack.localSDP = {};
+	 SipStack.options = {};
 	 SipStack.mediastack = null;
 	 SipStack.prototype.log = function () {
 			 console.log('doo!');
@@ -53,7 +55,9 @@ var SipStack = function () {};
     }) ;
 
 	SipStack.appSip.use('invite', function( req, res){
-    	console.log('INviTE recieved: %s', JSON.stringify(res),JSON.stringify(req.body) ) ;
+    	console.log('INviTE recieved: %s', JSON.stringify(res) ) ;
+
+			console.log(req.body);
     	var callId = res.msg.headers['call-id'];
     //	console.log('INVITE recieved: %s index %s' , JSON.stringify(req),callId ) ;
 			// get sessionId
@@ -63,23 +67,57 @@ var SipStack = function () {};
 			if (sessionId){
 				var remoteSdpStr = req.body;
 				var dialog =  SipStack.dialogs[sessionId];
-				SipStack.mediastack.renegotiateRTP(sessionId,remoteSdpStr,function(newLocalSdp){
+				var options = 	SipStack.options[sessionId];
+				if (options.renegotiate == "none"){
 					res.send( 200,{
-						body: newLocalSdp
-					},function(err, response){
-						if (!err){
-								SipStack.mediastack.renegotiateWebRTC(sessionId,function(err){
-									if (!err)
-										SipStack.mediastack.reconnect(sessionId);
-								});
-						}
+						body: SipStack.localSDP[sessionId]
 					});
-				});
+				}
+				else if (options.renegotiate == "rtp-webrtc"){
+					SipStack.mediastack.renegotiateRTP(sessionId,remoteSdpStr,function(err,newLocalSdp){
+						console.log("RTP renegotiated");
+						if (err) {
+							console.log(err);
+							return;
+						}
+						SipStack.res[sessionId] = res;
+						SipStack.localSDP[sessionId] = newLocalSdp;
+						SipStack.mediastack.renegotiateWebRTC(sessionId,function(err){
+									console.log("WebRTC renegotiated");
+						});
+					});
+				}
+				else if (!options || !options.renegotiate || options.renegotiate == "rtp"){ // Default renegotiate only RTP
+					SipStack.mediastack.renegotiateRTP(sessionId,remoteSdpStr,function(err,newLocalSdp){
+						console.log("RTP renegotiated");
+						if (err) {
+							console.log(err);
+							return;
+						}
+						SipStack.localSDP[sessionId] = newLocalSdp;
+						res.send( 200,{
+							body: SipStack.localSDP[sessionId]
+						},function(){
+							setTimeout( () => {SipStack.mediastack.reconnect(sessionId);},500);
+						});
+					});
+				}
 			}
 			else
 				res.send(404) ;
-	 }) ;
+	 });
 
+
+SipStack.prototype.reponseToReInvite = function (sessionId){
+		if (SipStack.res[sessionId]){
+			console.log("Send 200 OK"+SipStack.localSDP[sessionId]);
+			SipStack.res[sessionId].send( 200,{
+				body: SipStack.localSDP[sessionId]},function(){
+					//SipStack.mediastack.reconnect(sessionId);
+						setTimeout( () => {SipStack.mediastack.reconnect(sessionId);},500);
+				});
+		}
+}
 
 SipStack.prototype.init = function (callback){
   	SipStack.sipServerConnected = false;
@@ -94,7 +132,7 @@ SipStack.prototype.init = function (callback){
     ) ;
 }
 
-SipStack.prototype.invite = function (sessionId,from,to,localSDP,callback){
+SipStack.prototype.invite = function (sessionId,from,to,localSDP,options,callback){
 
 
 	console.log('Mediastack in sip id=' + SipStack.mediastack.id);
@@ -102,6 +140,8 @@ SipStack.prototype.invite = function (sessionId,from,to,localSDP,callback){
 	var sipDest = to;
   console.log("Send invite to "+ sipDest);
 	console.log("Send  local SDP to "+ localSDP);
+	console.log("Invite options"+ options);
+
 
 	if (sipDest.indexOf("sip:")!=0)
 		sipDest="sip:"+sipDest;
@@ -139,7 +179,7 @@ SipStack.prototype.invite = function (sessionId,from,to,localSDP,callback){
 							console.log('dialogId recv: ', res.stackDialogId);
   						SipStack.dialogs[sessionId] = res.stackDialogId ;
 							SipStack.localSDP[sessionId] = localSDP;
-
+							SipStack.options[sessionId] = options;
 							SipStack.sessionIds[res.stackDialogId] = sessionId;
               var callId = req.msg.headers["call-id"];
 							SipStack.sessionIdByCalls[callId] = sessionId;
@@ -188,6 +228,7 @@ SipStack.prototype.bye =  function (sessionId,sdpLocal) {
 									delete SipStack.dialogs[sessionId];
 									delete SipStack.sessionIdByCalls[callId];
 									delete SipStack.localSDP[sessionId];
+									delete SipStack.options[sessionId];
              			req.on('response', function(response){
 	                console.log('BYE '+response.status);
 	                });

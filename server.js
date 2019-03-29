@@ -112,7 +112,7 @@ wss.on('connection', function(ws) {
         console.log('Connection ' + sessionId + ' received message ', message);
         switch (message.id) {
         case 'start':
-            media.start(sessionId, ws, message.from,message.to,message.sdpOffer, function(error, sdpAnswer) {
+            media.start(sessionId, ws, message.from,message.to,message.sdpOffer, message.options, function(error, sdpAnswer) {
                 if (error) {
                     return ws.send(JSON.stringify({
                         id : 'error',

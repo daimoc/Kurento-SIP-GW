@@ -22,10 +22,12 @@ var util = require('util');
    MediaStack.sip = sip;
  }
 
- MediaStack.prototype.start = function (sessionId, ws, from,to, sdpOffer, callback) {
+ MediaStack.prototype.start = function (sessionId, ws, from,to, sdpOffer, options,callback) {
      if (!sessionId) {
          return callback('Cannot use undefined sessionId');
      }
+     MediaStack.candidatesQueue[sessionId] = [];
+
      MediaStack.sessions[sessionId]={
        'ws': ws
      };
@@ -46,7 +48,7 @@ var util = require('util');
                  return callback(error);
              }
 
-             createMediaElements(sessionId,pipeline, ws,from,to, function(error, webRtcEndpoint,rtpEndpoint) {
+             createMediaElements(sessionId,pipeline,ws,from,to,options, function(error, webRtcEndpoint,rtpEndpoint) {
                  if (error) {
                      pipeline.release();
                      return callback(error);
@@ -142,11 +144,18 @@ function mungleSDP(sdp){
   return mugleSdp;
 }
 
+function mungleSDP2(sdp){
+  mugleSdp = sdp;
+  var mugleSdp =  sdp.replace(new RegExp("RTP/AVPF", "g"),  "RTP/AVP");
+  var h264Payload = MediaStack.sip.getH264Payload(sdp);
+  return mugleSdp;
+}
+
 function prettyJSON(obj) {
     console.log(JSON.stringify(obj, null, 2));
 }
 
-function createMediaElements(sessionId,pipeline, ws,from,to , callback) {
+function createMediaElements(sessionId,pipeline,ws,from,to,options, callback) {
     pipeline.create('WebRtcEndpoint', function(error, webRtcEndpoint) {
         if (error) {
             return callback(error);
@@ -156,7 +165,7 @@ function createMediaElements(sessionId,pipeline, ws,from,to , callback) {
             if (error) {
                 return callback(error);
             }
-            createSipCall(sessionId,from+"@"+getIPAddress(),to,rtpEndpoint,function(error){
+            createSipCall(sessionId,from+"@"+getIPAddress(),to,rtpEndpoint,options,function(error){
                 if (error) {
                   return callback(error);
                 }
@@ -191,15 +200,20 @@ function reConnectMediaElements(sessionId) {
             console.log("Reconnect Media  "+sessionId);
           });
         }
+        /*
+        if (MediaStack.sessions[sessionId].OldRtpEndpoint){
+            MediaStack.sessions[sessionId].OldRtpEndpoint.release();
+            MediaStack.sessions[sessionId].OldRtpEndpoint=null;
+        }*/
     });
 }
 
 
-function createSipCall(sessionId,from,to,rtpEndpoint,callback){
+function createSipCall(sessionId,from,to,rtpEndpoint,options,callback){
       rtpEndpoint.generateOffer(function(error, sdpOffer) {
         var modSdp =  replace_ip(sdpOffer);
         modSdp = mungleSDP(modSdp);
-        MediaStack.sip.invite (sessionId,from,to,modSdp,function (error,remoteSdp){
+        MediaStack.sip.invite (sessionId,from,to,modSdp,options,function (error,remoteSdp){
           if (error){
             return callback(error);
           }
@@ -278,31 +292,33 @@ MediaStack.prototype.reconnect = function (sessionId){
 
 MediaStack.prototype.renegotiateWebRTC = function (sessionId,callback){
   if (MediaStack.sessions[sessionId] && MediaStack.sessions[sessionId].pipeline){
-    var pipeline = MediaStack.sessions[sessionId].pipeline;
+        var pipeline = MediaStack.sessions[sessionId].pipeline;
+        MediaStack.sessions[sessionId].webRtcEndpoint.release();
+        MediaStack.sessions[sessionId].renegotiated=true;
+        MediaStack.candidatesQueue[sessionId]=[];
 
-    MediaStack.sessions[sessionId].webRtcEndpoint.release();
-    pipeline.create('WebRtcEndpoint', function(error, webRtcEndpoint){
-        if (error) {
-            return callback(error);
-        }
-        MediaStack.sessions[sessionId].webRtcEndpoint = webRtcEndpoint;
-        webRtcEndpoint.generateOffer(function(error,sdpOffer) {
-              if (error){
-                console.log("SdpOffer not accepted by kurento");
-                console.log(error);
+        pipeline.create('WebRtcEndpoint', function(error, webRtcEndpoint){
+            if (error) {
                 return callback(error);
-              }
-              var ws = MediaStack.sessions[sessionId].ws;
-              if (ws != undefined){
-                ws.send(JSON.stringify({
-                    id : 'renegotiateWebRTC',
-                    sdp : sdpOffer
-                }));
-                return callback();
-              }
-          });
-        });
-    };
+            }
+            MediaStack.sessions[sessionId].webRtcEndpoint = webRtcEndpoint;
+            webRtcEndpoint.generateOffer(function(error,sdpOffer) {
+                  if (error){
+                    console.log("SdpOffer not accepted by kurento");
+                    console.log(error);
+                    return callback(error);
+                  }
+                  var ws = MediaStack.sessions[sessionId].ws;
+                  if (ws != undefined){
+                    ws.send(JSON.stringify({
+                        id : 'renegotiateWebRTC',
+                        sdp : sdpOffer
+                    }));
+                    return callback();
+                  }
+              });
+            });
+        };
 }
 
 MediaStack.prototype.renegotiateResponse = function (sessionId,sdp){
@@ -327,11 +343,13 @@ MediaStack.prototype.renegotiateResponse = function (sessionId,sdp){
       });
 
       webRtcEndpoint.processAnswer(sdp, function(error) {
+          MediaStack.sessions[sessionId].renegotiated=false;
           if (error) {
               pipeline.release();
               console.log("ProcessAnswer Error"+error);
           }
-          reConnectMediaElements(sessionId)
+          MediaStack.sip.reponseToReInvite(sessionId);
+        //  reConnectMediaElements(sessionId);
           return;
       });
 
@@ -343,32 +361,48 @@ MediaStack.prototype.renegotiateResponse = function (sessionId,sdp){
     }
 }
 
+function disconnectElement (webRtcEndpoint,rtpEndpoint,callback){
+  rtpEndpoint.disconnect(webRtcEndpoint, function(error) {
+      if (error)
+        callback(error)
+      webRtcEndpoint.disconnect(rtpEndpoint,function (error){
+        if (error)
+          callback(error);
+
+        rtpEndpoint.release((error)=>{
+            if (error)
+              callback(error);
+            callback(null);
+        });
+      });
+  });
+}
+
 MediaStack.prototype.renegotiateRTP = function (sessionId, remoteSdp,callback){
   if (MediaStack.sessions[sessionId] && MediaStack.sessions[sessionId].pipeline){
     var pipeline = MediaStack.sessions[sessionId].pipeline;
+    disconnectElement(MediaStack.sessions[sessionId].webRtcEndpoint,MediaStack.sessions[sessionId].rtpEndpoint,function(){
 
-    MediaStack.sessions[sessionId].rtpEndpoint.release();
+      //MediaStack.sessions[sessionId].rtpEndpoint.release();
+      pipeline.create('RtpEndpoint', function(error, rtpEndpoint){
+          if (error) {
+              return callback(error);
+          }
+          rtpEndpoint.processOffer(remoteSdp,function(error,sdpOffer) {
+                if (error){
+                  console.log("SdpOffer not accepted by kurento");
+                  console.log(error);
+                  return callback(error);
+                }
+                var modSdp =  replace_ip(sdpOffer);
+                modSdp = mungleSDP2(modSdp);
 
-    pipeline.create('RtpEndpoint', function(error, rtpEndpoint){
-        if (error) {
-            return callback(error);
-        }
-        rtpEndpoint.processOffer(remoteSdp,function(error,sdpOffer) {
-              if (error){
-                console.log("SdpOffer not accepted by kurento");
-                console.log(error);
-                return callback(error);
-              }
-              var modSdp =  replace_ip(sdpOffer);
-              modSdp = mungleSDP(modSdp);
-              MediaStack.sessions[sessionId].rtpEndpoint = rtpEndpoint;
-
-              return callback(modSdp);
+                MediaStack.sessions[sessionId].rtpEndpoint = rtpEndpoint;
+                return callback(null,modSdp);
+            });
           });
-        });
-    };
-
-
+    });
+  }
 }
 
 
