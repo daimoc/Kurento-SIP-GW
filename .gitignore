@@ -1,3 +1,5 @@
 node_modules/
 .vagrant
 drachtio-server
+static/bower_components
+package-lock.json
