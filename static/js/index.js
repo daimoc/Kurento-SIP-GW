@@ -250,7 +250,9 @@ function onIceCandidate(candidate) {
 function onOffer(error, offerSdp) {
 	if(error) return onError(error);
 	console.info('Invoking SDP offer callback function ' + location.host);
-	var optionsObj = {renegotiate:"rtp"};
+	var optionsObj = {
+		renegotiate : renegotiateMode
+	};
 
 	var message = {
 		id : 'start',

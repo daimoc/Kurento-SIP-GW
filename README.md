@@ -96,6 +96,11 @@ Change client gateway option in static/js/config_client.js
 
 * dtmfTransport : "inband" for audio inband DTMF || "sip"  for SIP INFO dtmf (Default to inband).
 
+* renegotiateMode : set how SIP calls deals with remote re-invite
+  - none = only reply to SIP  but not change anything in media stack
+  - rtp = restart the rtp connection part on media stack (default value)
+  - rtp-webrtc = restart the rtp connection part on media stack and restart the peerconnectino on browser part  
+
 
 ## To run
 ```bash
@@ -110,7 +115,7 @@ By removing VP8 support in Kurento server configuration you can disable h264 enc
 
 Take care that removing transcoding in Kurento add some stability issues (Maybe due to keyframe generation on browser side).
 
-First install openh264 gstreamer plugin 
+First install openh264 gstreamer plugin
 ```bash
 sudo apt-get install openh264-gst-plugins-bad-1.5
 ```
