@@ -1,1 +1,2 @@
-svagrant halt
+vagrant halt
+pause
