@@ -7,7 +7,8 @@ echo "Start"
 #sudo apt-get install coturn
 
 echo "Installation of Drachtio"
-git clone --depth=50 --branch=develop git://github.com/davehorton/drachtio-server.git && cd drachtio-server
+git clone --depth=50 --branch=develop git://github.com/davehorton/drachtio-server.git
+cd drachtio-server
 git submodule update --init --recursive
 ./bootstrap.sh
 mkdir build && cd build

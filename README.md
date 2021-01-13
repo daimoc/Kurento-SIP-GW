@@ -13,15 +13,22 @@ It was firstly designed to work with Asterisk and it works with it.
 ## Architecture
 ![Kurento-SIP-GW architecture](https://raw.githubusercontent.com/daimoc/Kurento-SIP-GW/master/archi.png "Kurento-SIP-GW architecture")
 
-## Installation on Ubuntu 16.04
+## Installation on Ubuntu 18.04
 
 First, install  [Kurento-media-server](https://github.com/Kurento/kurento-media-server) (with a coturn server it's better) :
 
 ```bash
-echo "deb http://ubuntu.kurento.org trusty kms6" | sudo tee /etc/apt/sources.list.d/kurento.list
-wget -O - http://ubuntu.kurento.org/kurento.gpg.key | sudo apt-key add -
-sudo apt-get update
-sudo apt-get install kurento-media-server-6.0
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5AFA7A83
+source /etc/upstream-release/lsb-release 2>/dev/null || source /etc/lsb-release
+
+sudo tee "/etc/apt/sources.list.d/kurento.list" >/dev/null <<EOF
+# Kurento Media Server - Release packages
+deb [arch=amd64] http://ubuntu.openvidu.io/6.15.0 bionic kms6
+EOF
+
+sudo apt-get update && sudo apt-get install --no-install-recommends --yes \
+    kurento-media-server
+
 ```
 
 Now, install [coturn](http://doc-kurento.readthedocs.io/en/stable/faq.html)
