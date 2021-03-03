@@ -27,7 +27,12 @@ var https = require('https');
 var sip = require('./sipstack.js');
 var media = require('./mediastack.js');
 var config = require('./config');
-var uuid = require('uuid/v1');
+//var uuid = require('uuid/v4');
+const {
+  v1: uuidv1,
+  v4: uuidv4,
+} = require('uuid');
+
 var util = require('util');
 
 var options =
@@ -93,7 +98,7 @@ wss.on('connection', function(ws,req) {
     };
 
     sessionHandler(request, response, function(err) {
-        sessionId = uuid();
+        sessionId = uuidv1();
         console.log('Connection received with sessionId ' + sessionId);
     });
 
